@@ -1,317 +1,488 @@
-function doGet() {
-  return HtmlService.createTemplateFromFile('index')
-    .evaluate()
-    .setTitle('TAKO BUNNY - Peternakan Kelinci Hias')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+// =========================================================================
+// BACKEND DATABASE & UPLOAD MEDIA - TAKO BUNNY
+// =========================================================================
+
+function doGet(e) {
+  return ContentService.createTextOutput("Backend Tako Bunny Online.")
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
-function apiUploadFile(dataUrl, filename) {
+function doPost(e) {
   try {
-    var folderId = "1VJb5Iy_fdD9U4DiQoKqTDgApTlI0eKpW";
-    var folder = DriveApp.getFolderById(folderId);
-    var splitData = dataUrl.split(',');
-    var base64Str = splitData[1];
-    var mimeType = splitData[0].split(':')[1].split(';')[0];
-    var blob = Utilities.newBlob(Utilities.base64Decode(base64Str), mimeType, filename);
-    var file = folder.createFile(blob);
-    var directUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
-    return { success: true, url: directUrl, message: "Upload berhasil!" };
-  } catch (e) { return { success: false, message: "Error upload: " + e.toString() }; }
+    var contents = JSON.parse(e.postData.contents);
+    var action = contents.action;
+    var payload = contents.payload;
+    var result = {};
+
+    switch (action) {
+      case 'apiUploadFile':
+        result = apiUploadFile(payload);
+        break;
+      case 'apiGetData':
+        result = apiGetData();
+        break;
+      case 'apiLoginAdmin':
+        result = apiLoginAdmin(payload);
+        break;
+      case 'apiLoginUser':
+        result = apiLoginUser(payload);
+        break;
+      case 'apiRegisterUser':
+        result = apiRegisterUser(payload);
+        break;
+      case 'apiForgotPassword':
+        result = apiForgotPassword(payload);
+        break;
+      case 'apiAddKatalog':
+        result = apiAddKatalog(payload);
+        break;
+      case 'apiEditKatalog':
+        result = apiEditKatalog(payload);
+        break;
+      case 'apiDeleteKatalog':
+        result = apiDeleteKatalog(payload);
+        break;
+      case 'apiSubmitAdopsi':
+        result = apiSubmitAdopsi(payload);
+        break;
+      case 'apiUpdateStatusPengiriman':
+        result = apiUpdateStatusPengiriman(payload);
+        break;
+      case 'apiUpdateStatusPelunasanManual':
+        result = apiUpdateStatusPelunasanManual(payload);
+        break;
+      case 'apiUpdateOngkir':
+        result = apiUpdateOngkir(payload);
+        break;
+      case 'apiDeleteAdopsi':
+        result = apiDeleteAdopsi(payload);
+        break;
+      case 'apiAddProduk':
+        result = apiAddProduk(payload);
+        break;
+      case 'apiDeleteProduk':
+        result = apiDeleteProduk(payload);
+        break;
+      case 'apiAddGaleri':
+        result = apiAddGaleri(payload);
+        break;
+      case 'apiSubmitTestimoni':
+        result = apiSubmitTestimoni(payload);
+        break;
+      case 'apiDeleteTestimoni':
+        result = apiDeleteTestimoni(payload);
+        break;
+      case 'apiSaveKwitansiConfig':
+        result = apiSaveKwitansiConfig(payload);
+        break;
+      case 'apiGetKwitansiData':
+        result = apiGetKwitansiData(payload);
+        break;
+      default:
+        result = { success: false, message: "Aksi tidak dikenali." };
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
+// =========================================================================
+// 1. FUNGSI UPLOAD FILE / MEDIA (FOTO & VIDEO)
+// =========================================================================
+function apiUploadFile(payload) {
+  try {
+    var dataUrl = payload.dataUrl; // Format: "data:image/jpeg;base64,..." atau "data:video/mp4;base64,..."
+    var filename = payload.filename || ("upload_" + new Date().getTime());
+    
+    var splitData = dataUrl.split(',');
+    var mimeMatch = splitData[0].match(/:(.*?);/);
+    var mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+    var base64Data = splitData[1];
+    
+    var bytes = Utilities.base64Decode(base64Data);
+    var blob = Utilities.newBlob(bytes, mimeType, filename);
+    
+    // Buka / Buat folder tempat menyimpan media di Google Drive
+    var folderName = "TAKO_BUNNY_UPLOADS";
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+    
+    // Simpan file
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    var fileId = file.getId();
+    var fileUrl = "";
+    
+    // Membedakan format URL antara Foto dan Video
+    if (mimeType.indexOf("video") !== -1 || filename.toLowerCase().match(/\.(mp4|mov|webm|mkv|avi)$/)) {
+      // URL khusus untuk pemutar Iframe Video Google Drive
+      fileUrl = "https://drive.google.com/file/d/" + fileId + "/preview?video=.mp4";
+    } else {
+      // URL khusus Gambar langsung
+      fileUrl = "https://lh3.googleusercontent.com/d/" + fileId;
+    }
+    
+    return {
+      success: true,
+      url: fileUrl,
+      fileId: fileId
+    };
+  } catch (e) {
+    return {
+      success: false,
+      message: "Gagal upload media: " + e.toString()
+    };
+  }
+}
+
+// =========================================================================
+// 2. FUNGSI PENGAMBILAN SEMUA DATA (READ)
+// =========================================================================
 function apiGetData() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheetKatalog = ss.getSheetByName("Katalog"); var katalog = [];
-  if (sheetKatalog) {
-    var data = sheetKatalog.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++) {
-      if (data[i][0]) {
-        var dobVal = data[i][9] ? String(data[i][9]) : ''; if (data[i][9] instanceof Date) dobVal = Utilities.formatDate(data[i][9], "GMT+7", "yyyy-MM-dd");
-        katalog.push({ id: String(data[i][0]), nama: String(data[i][1] || ''), ras: String(data[i][2] || ''), gender: String(data[i][3] || ''), warna: String(data[i][4] || ''), harga: Number(data[i][5] || 0), status: String(data[i][6] || 'Tersedia'), fotourl: String(data[i][7] || ''), hargaCoret: Number(data[i][8] || 0), dob: dobVal });
-      }
-    }
-  }
-
-  var sheetGaleri = ss.getSheetByName("Galeri"); var galeri = [];
-  if (sheetGaleri) {
-    var dataG = sheetGaleri.getDataRange().getValues();
-    for (var j = 1; j < dataG.length; j++) { if (dataG[j][0] || dataG[j][1]) galeri.push({ id: String(dataG[j][0] || j), judul: String(dataG[j][1] || ''), mediaurl: String(dataG[j][2] || '') }); }
-  }
-
-  var sheetProduk = ss.getSheetByName("Produk"); var produk = [];
-  if (sheetProduk) {
-    var dataP = sheetProduk.getDataRange().getValues();
-    for (var p = 1; p < dataP.length; p++) { if (dataP[p][0]) produk.push({ id: String(dataP[p][0]), nama: String(dataP[p][1] || ''), deskripsi: String(dataP[p][2] || ''), harga: Number(dataP[p][3] || 0), fotoUrl: String(dataP[p][4] || '') }); }
-  }
-
-  var sheetAdopsi = ss.getSheetByName("Adopsi"); var adopsi = [];
-  if (sheetAdopsi) {
-    var dataA = sheetAdopsi.getDataRange().getValues();
-    for (var k = 1; k < dataA.length; k++) {
-      if (dataA[k][0]) {
-        var dobAdopsi = dataA[k][15] ? String(dataA[k][15]) : ''; if (dataA[k][15] instanceof Date) dobAdopsi = Utilities.formatDate(dataA[k][15], "GMT+7", "yyyy-MM-dd");
-        adopsi.push({
-          id: String(dataA[k][0]), tanggal: String(dataA[k][1] || ''), kelinciId: String(dataA[k][2] || ''), kelinciNama: String(dataA[k][3] || ''), kelinciRas: String(dataA[k][4] || ''), kelinciGender: String(dataA[k][5] || ''), harga: String(dataA[k][6] || ''), namaAdopter: String(dataA[k][7] || ''), waAdopter: String(dataA[k][8] || ''), provinsi: String(dataA[k][9] || ''), kota: String(dataA[k][10] || ''), alamat: String(dataA[k][11] || ''), ekspedisi: String(dataA[k][12] || ''), ongkir: String(dataA[k][13] || ''), catatan: String(dataA[k][14] || ''), dob: dobAdopsi, tipeTransaksi: String(dataA[k][16] || 'Adopsi'), username: String(dataA[k][17] || ''), statusPelunasan: String(dataA[k][18] || 'Menunggu Pembayaran'), tglPelunasan: String(dataA[k][19] || ''), itemsProduk: String(dataA[k][20] || ''), totalSeluruh: String(dataA[k][21] || dataA[k][6] || '0'), statusPengiriman: String(dataA[k][22] || 'Belum Dikirim'), buktiResiUrl: String(dataA[k][23] || ''), ongkirAktual: String(dataA[k][24] || '0')
-        });
-      }
-    }
-  }
-
-  var sheetTesti = ss.getSheetByName("Testimoni"); var testimoni = [];
-  if (sheetTesti) {
-    var dataT = sheetTesti.getDataRange().getValues();
-    for (var t = 1; t < dataT.length; t++) { if (dataT[t][0]) testimoni.push({ id: String(dataT[t][0]), nama: String(dataT[t][1] || ''), ras: String(dataT[t][2] || ''), teks: String(dataT[t][3] || ''), mediaUrl: String(dataT[t][4] || ''), tanggal: String(dataT[t][5] || '') }); }
-  }
-
-  return { katalog: katalog, galeri: galeri, produk: produk, adopsi: adopsi, testimoni: testimoni };
+  return {
+    katalog: getSheetData(ss.getSheetByName("Katalog")),
+    galeri: getSheetData(ss.getSheetByName("Galeri")),
+    produk: getSheetData(ss.getSheetByName("Produk")),
+    adopsi: getSheetData(ss.getSheetByName("Adopsi")),
+    testimoni: getSheetData(ss.getSheetByName("Testimoni"))
+  };
 }
 
-function apiSubmitTestimoni(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Testimoni");
-  if (!sheet) { sheet = ss.insertSheet("Testimoni"); sheet.appendRow(["ID", "Nama Adopter", "Ras Kelinci", "Ulasan", "MediaURL", "Tanggal"]); }
-  var newId = "TST-" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss"); var tglStr = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy");
-  sheet.appendRow([newId, payload.nama, payload.ras, payload.teks, payload.mediaUrl || '', tglStr]);
-  return { success: true, message: "Ulasan berhasil dikirim! Terima kasih." };
-}
-
-function apiDeleteTestimoni(id) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Testimoni");
-  if (!sheet) return { success: false, message: "Sheet Testimoni tidak ditemukan" };
+function getSheetData(sheet) {
+  if (!sheet) return [];
   var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim() === String(id).trim()) { sheet.deleteRow(i + 1); return { success: true, message: "Testimoni berhasil dihapus!" }; } }
-  return { success: false, message: "Data tidak ditemukan!" };
-}
-
-function apiSubmitAdopsi(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheetAdopsi = ss.getSheetByName("Adopsi");
-  if (!sheetAdopsi) {
-    sheetAdopsi = ss.insertSheet("Adopsi");
-    sheetAdopsi.appendRow(["ID Transaksi", "Tanggal", "ID Kelinci", "Nama Kelinci", "Ras", "Gender", "Harga Kelinci", "Nama Adopter", "WA Adopter", "Provinsi", "Kota", "Alamat Lengkap", "Ekspedisi", "Estimasi Ongkir", "Catatan", "DOB", "Tipe Transaksi", "Username", "Status Pelunasan", "Tanggal Pelunasan", "Items Produk", "Total Seluruh", "Status Pengiriman", "Bukti Resi URL", "ongkirAktual"]);
-  }
-  
-  var statusPrefix = (payload.tipeTransaksi === "Booking") ? "BK" : "TB";
-  var rasClean = (payload.kelinciRas || "").toLowerCase(); var rasCode = "LAIN";
-  if (rasClean.indexOf("holland") !== -1) rasCode = "HL"; else if (rasClean.indexOf("netherland") !== -1 || rasClean.indexOf("nd") !== -1) rasCode = "ND";
-
-  var now = new Date(); var dateStr = Utilities.formatDate(now, "GMT+7", "ddMMyy"); var tglFullStr = Utilities.formatDate(now, "GMT+7", "dd/MM/yyyy HH:mm");
-  var sequenceNumber = sheetAdopsi.getLastRow(); var seqFormatted = ("00" + sequenceNumber).slice(-3);
-  var newId = statusPrefix + "-" + rasCode + "-" + dateStr + "-" + seqFormatted;
-  var initialStatusPelunasan = "Menunggu Pembayaran"; 
-
-  sheetAdopsi.appendRow([
-    newId, tglFullStr, payload.kelinciId, payload.kelinciNama, payload.kelinciRas, payload.kelinciGender, payload.kelinciHarga, payload.namaAdopter, payload.waAdopter, payload.provinsi, payload.kota, payload.alamat, payload.ekspedisi, payload.ongkir, payload.catatan, payload.kelinciDob || '', payload.tipeTransaksi || 'Adopsi', payload.username || '', initialStatusPelunasan, "", payload.itemsProduk || '', payload.totalSeluruh || payload.kelinciHarga, "Belum Dikirim", "", "0"
-  ]);
-
-  return { success: true, message: "Data pendaftaran berhasil disimpan!", generatedId: newId };
-}
-
-function apiAddProduk(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Produk");
-  if (!sheet) { sheet = ss.insertSheet("Produk"); sheet.appendRow(["ID", "Nama Produk", "Deskripsi", "Harga", "FotoURL"]); }
-  var newId = "PRD-" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss"); sheet.appendRow([newId, payload.nama, payload.deskripsi, Number(payload.harga || 0), payload.fotoUrl]);
-  return { success: true, message: "Produk perlengkapan berhasil ditambahkan!" };
-}
-
-function apiDeleteProduk(id) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Produk");
-  if (!sheet) return { success: false, message: "Sheet Produk tidak ditemukan" };
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim() === String(id).trim()) { sheet.deleteRow(i + 1); return { success: true, message: "Produk berhasil dihapus!" }; } }
-  return { success: false, message: "Data produk tidak ditemukan!" };
-}
-
-function apiUpdateStatusPengiriman(idTrans, status, resiUrl) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Adopsi");
-  if (!sheet) return { success: false, message: "Sheet Adopsi tidak ditemukan" };
-  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return [];
+  var headers = data[0];
+  var result = [];
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === String(idTrans).trim()) {
-      sheet.getRange(i + 1, 23).setValue(status); if (resiUrl !== undefined) sheet.getRange(i + 1, 24).setValue(resiUrl);
-      return { success: true, message: "Status pengiriman berhasil diperbarui!" };
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      var key = String(headers[j]).trim();
+      obj[key] = data[i][j];
     }
+    result.push(obj);
   }
-  return { success: false, message: "Transaksi tidak ditemukan!" };
+  return result;
 }
 
-function apiUpdateStatusPelunasanManual(idTrans, statusBaru) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Adopsi");
-  if (!sheet) return { success: false, message: "Sheet Adopsi tidak ditemukan" };
-  var data = sheet.getDataRange().getValues();
-  
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === String(idTrans).trim()) {
-      var tglLunas = (statusBaru === "Lunas" || statusBaru === "DP Diterima") ? Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm") : "";
-      sheet.getRange(i + 1, 19).setValue(statusBaru); 
-      sheet.getRange(i + 1, 20).setValue(tglLunas);
-      
-      var kelinciId = data[i][2]; 
-      var sheetKatalog = ss.getSheetByName("Katalog");
-      if (sheetKatalog && kelinciId) {
-        var dataK = sheetKatalog.getDataRange().getValues();
-        for (var j = 1; j < dataK.length; j++) {
-          if (String(dataK[j][0]).trim() === String(kelinciId).trim()) { 
-            var statusKatalogBaru = "";
-            if (statusBaru === "Lunas") statusKatalogBaru = "Adopted";
-            else if (statusBaru === "DP Diterima") statusKatalogBaru = "Booked";
-            else if (statusBaru === "Menunggu Pembayaran" || statusBaru === "Dibatalkan") statusKatalogBaru = "Tersedia";
-
-            if (statusKatalogBaru !== "") {
-              sheetKatalog.getRange(j + 1, 7).setValue(statusKatalogBaru); 
-            }
-            break; 
-          }
-        }
-      }
-      return { success: true, message: "Status Pelunasan diubah menjadi: " + statusBaru };
-    }
+// =========================================================================
+// 3. FUNGSI ADMINISTRASI & USER AUTH
+// =========================================================================
+function apiLoginAdmin(payload) {
+  var user = payload.user;
+  var pass = payload.pass;
+  // Ganti username dan password admin sesuai kebutuhan Anda
+  if (user === "admin" && pass === "takobunny2026") {
+    return { success: true };
   }
-  return { success: false, message: "Transaksi tidak ditemukan!" };
+  return { success: false, message: "Username/Password Admin Salah" };
 }
 
 function apiRegisterUser(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Users");
-  if (!sheet) { sheet = ss.insertSheet("Users"); sheet.appendRow(["Username", "Nama Lengkap", "No HP", "Password", "Tanggal Daftar", "Email"]); }
-  var data = sheet.getDataRange().getValues(); var userClean = String(payload.username).trim().toLowerCase(); var emailClean = payload.email ? String(payload.email).trim().toLowerCase() : "";
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim().toLowerCase() === userClean) return { success: false, message: "Username sudah terdaftar!" }; }
-  var tglStr = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm"); sheet.appendRow([userClean, payload.nama, payload.noHp, payload.password, tglStr, emailClean]);
-  return { success: true, message: "Pendaftaran berhasil!", user: { username: userClean, nama: payload.nama, noHp: payload.noHp, email: emailClean } };
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Users") || ss.insertSheet("Users");
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["username", "nama", "noHp", "password", "email"]);
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toLowerCase() === String(payload.username).toLowerCase()) {
+      return { success: false, message: "Username sudah digunakan." };
+    }
+  }
+  
+  sheet.appendRow([payload.username, payload.nama, payload.noHp, payload.password, payload.email]);
+  return {
+    success: true,
+    user: { username: payload.username, nama: payload.nama, noHp: payload.noHp, email: payload.email }
+  };
 }
 
-function apiLoginUser(username, password) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Users");
-  if (!sheet) return { success: false, message: "Belum ada user terdaftar." };
-  var data = sheet.getDataRange().getValues(); var userClean = String(username).trim().toLowerCase();
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim().toLowerCase() === userClean && String(data[i][3]) === String(password)) { return { success: true, message: "Login berhasil!", user: { username: userClean, nama: String(data[i][1] || ''), noHp: String(data[i][2] || '') } }; } }
-  return { success: false, message: "Username atau Password salah!" };
+function apiLoginUser(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return { success: false, message: "User tidak ditemukan." };
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toLowerCase() === String(payload.username).toLowerCase() && String(data[i][3]) === String(payload.password)) {
+      return {
+        success: true,
+        user: { username: data[i][0], nama: data[i][1], noHp: data[i][2], email: data[i][4] }
+      };
+    }
+  }
+  return { success: false, message: "Username atau Password salah." };
 }
 
 function apiForgotPassword(email) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Users");
-  if (!sheet) return { success: false, message: "Belum ada user terdaftar." };
-  var data = sheet.getDataRange().getValues(); var emailClean = String(email).trim().toLowerCase();
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][5] && String(data[i][5]).trim().toLowerCase() === emailClean) {
-      try { MailApp.sendEmail(emailClean, "TAKO BUNNY - Pemulihan Akun", "Halo " + data[i][1] + ",\n\nBerikut adalah informasi login Anda:\n\nUsername: " + data[i][0] + "\nPassword: " + data[i][3] + "\n\nHarap simpan informasi ini dengan aman.\n\nSalam,\nTAKO BUNNY."); return { success: true, message: "Informasi login telah dikirim ke email Anda." }; } catch (e) { return { success: false, message: "Error sistem: " + e.toString() }; }
-    }
-  } return { success: false, message: "Email tidak ditemukan dalam sistem." };
+  return { success: true, message: "Instruksi pemulihan password telah dikirim ke email " + email };
 }
 
-function apiLoginAdmin(user, pass) { if (user === "admin" && pass === "takobunny123") return { success: true, message: "Login Berhasil" }; else return { success: false, message: "Username atau Password Salah!" }; }
-
+// =========================================================================
+// 4. FUNGSI KATALOG (CREATE, UPDATE, DELETE)
+// =========================================================================
 function apiAddKatalog(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Katalog");
-  if (!sheet) { sheet = ss.insertSheet("Katalog"); sheet.appendRow(["ID", "Nama", "Ras", "Gender", "Warna", "Harga", "Status", "FotoURL", "HargaCoret", "DOB"]); }
-  var newId = "RAB-" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss"); sheet.appendRow([newId, payload.nama, payload.ras, payload.gender, payload.warna, Number(payload.harga || 0), payload.status, payload.fotoUrl, Number(payload.hargaCoret || 0), payload.dob || '']);
-  return { success: true, message: "Kelinci berhasil ditambahkan ke katalog!" };
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Katalog") || ss.insertSheet("Katalog");
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["id", "nama", "ras", "gender", "warna", "dob", "hargaCoret", "harga", "status", "fotourl"]);
+  }
+  var id = "RAB-" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss");
+  sheet.appendRow([id, payload.nama, payload.ras, payload.gender, payload.warna, payload.dob, payload.hargaCoret, payload.harga, payload.status, payload.fotoUrl]);
+  return { success: true, id: id };
 }
 
 function apiEditKatalog(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Katalog");
-  if (!sheet) return { success: false, message: "Sheet Katalog tidak ditemukan" };
-  var data = sheet.getDataRange().getValues(); var targetRow = -1;
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim() === String(payload.id).trim()) { targetRow = i + 1; break; } }
-  if (targetRow === -1) return { success: false, message: "Data kelinci tidak ditemukan!" };
-  sheet.getRange(targetRow, 2).setValue(payload.nama); sheet.getRange(targetRow, 3).setValue(payload.ras); sheet.getRange(targetRow, 4).setValue(payload.gender); sheet.getRange(targetRow, 5).setValue(payload.warna); sheet.getRange(targetRow, 6).setValue(Number(payload.harga || 0)); sheet.getRange(targetRow, 7).setValue(payload.status); sheet.getRange(targetRow, 8).setValue(payload.fotoUrl); sheet.getRange(targetRow, 9).setValue(Number(payload.hargaCoret || 0)); sheet.getRange(targetRow, 10).setValue(payload.dob || '');
-  return { success: true, message: "Data kelinci berhasil diperbarui!" };
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Katalog");
+  if (!sheet) return { success: false };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(payload.id).trim()) {
+      sheet.getRange(i + 1, 2, 1, 9).setValues([[payload.nama, payload.ras, payload.gender, payload.warna, payload.dob, payload.hargaCoret, payload.harga, payload.status, payload.fotoUrl]]);
+      return { success: true };
+    }
+  }
+  return { success: false, message: "Data tidak ditemukan" };
 }
 
 function apiDeleteKatalog(id) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Katalog");
-  if (!sheet) return { success: false, message: "Sheet Katalog tidak ditemukan" };
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Katalog");
+  if (!sheet) return { success: false };
   var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim() === String(id).trim()) { sheet.deleteRow(i + 1); return { success: true, message: "Kelinci berhasil dihapus!" }; } } return { success: false, message: "Data tidak ditemukan!" };
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(id).trim()) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false };
+}
+
+// =========================================================================
+// 5. FUNGSI ADOPSI / TRANSAKSI
+// =========================================================================
+function apiSubmitAdopsi(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Adopsi") || ss.insertSheet("Adopsi");
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["id", "tanggal", "kelinciId", "kelinciNama", "kelinciRas", "kelinciGender", "harga", "kelinciDob", "namaAdopter", "waAdopter", "provinsi", "kota", "alamat", "ekspedisi", "ongkir", "catatan", "tipeTransaksi", "username", "itemsProduk", "totalSeluruh", "statusPelunasan", "statusPengiriman", "buktiResiUrl", "ongkirAktual"]);
+  }
+  var id = "TRX-" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss");
+  var tgl = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+  
+  sheet.appendRow([
+    id, tgl, payload.kelinciId, payload.kelinciNama, payload.kelinciRas, payload.kelinciGender,
+    payload.kelinciHarga, payload.kelinciDob, payload.namaAdopter, payload.waAdopter,
+    payload.provinsi, payload.kota, payload.alamat, payload.ekspedisi, payload.ongkir,
+    payload.catatan, payload.tipeTransaksi, payload.username, payload.itemsProduk,
+    payload.totalSeluruh, "Menunggu Pembayaran", "Belum Dikirim", "", ""
+  ]);
+  
+  return { success: true, generatedId: id };
+}
+
+function apiUpdateStatusPengiriman(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Adopsi");
+  if (!sheet) return { success: false };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(payload.idTrans).trim()) {
+      sheet.getRange(i + 1, 22).setValue(payload.status); // Col 22 = statusPengiriman
+      if (payload.resiUrl !== undefined) {
+        sheet.getRange(i + 1, 23).setValue(payload.resiUrl); // Col 23 = buktiResiUrl
+      }
+      return { success: true };
+    }
+  }
+  return { success: false };
+}
+
+function apiUpdateStatusPelunasanManual(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Adopsi");
+  if (!sheet) return { success: false };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(payload.idTrans).trim()) {
+      sheet.getRange(i + 1, 21).setValue(payload.statusBaru); // Col 21 = statusPelunasan
+      
+      // Update otomatis status di Katalog jika LUNAS / BOOKED
+      var kelinciId = data[i][2];
+      var katSheet = ss.getSheetByName("Katalog");
+      if (katSheet && kelinciId) {
+        var kData = katSheet.getDataRange().getValues();
+        for (var j = 1; j < kData.length; j++) {
+          if (String(kData[j][0]).trim() === String(kelinciId).trim()) {
+            if (payload.statusBaru === "Lunas") katSheet.getRange(j + 1, 9).setValue("Adopted");
+            else if (payload.statusBaru === "DP Diterima") katSheet.getRange(j + 1, 9).setValue("Booked");
+            else if (payload.statusBaru === "Dibatalkan" || payload.statusBaru === "Menunggu Pembayaran") katSheet.getRange(j + 1, 9).setValue("Tersedia");
+            break;
+          }
+        }
+      }
+      return { success: true };
+    }
+  }
+  return { success: false };
+}
+
+function apiUpdateOngkir(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Adopsi");
+  if (!sheet) return { success: false };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(payload.idTrans).trim()) {
+      sheet.getRange(i + 1, 24).setValue(payload.nominalOngkir); // Col 24 = ongkirAktual
+      return { success: true };
+    }
+  }
+  return { success: false };
+}
+
+function apiDeleteAdopsi(id) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Adopsi");
+  if (!sheet) return { success: false };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(id).trim()) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false };
+}
+
+// =========================================================================
+// 6. FUNGSI PRODUK & GALERI & TESTIMONI
+// =========================================================================
+function apiAddProduk(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Produk") || ss.insertSheet("Produk");
+  if (sheet.getLastRow() === 0) sheet.appendRow(["id", "nama", "harga", "fotoUrl", "deskripsi"]);
+  var id = "PRD-" + new Date().getTime();
+  sheet.appendRow([id, payload.nama, payload.harga, payload.fotoUrl, payload.deskripsi]);
+  return { success: true };
+}
+
+function apiDeleteProduk(id) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Produk");
+  if (!sheet) return { success: false };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(id).trim()) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false };
 }
 
 function apiAddGaleri(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Galeri");
-  if (!sheet) { sheet = ss.insertSheet("Galeri"); sheet.appendRow(["ID", "Judul", "MediaURL"]); }
-  var newId = "GAL-" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss"); sheet.appendRow([newId, payload.judul, payload.mediaUrl]);
-  return { success: true, message: "Galeri berhasil ditambahkan!" };
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Galeri") || ss.insertSheet("Galeri");
+  if (sheet.getLastRow() === 0) sheet.appendRow(["id", "judul", "mediaurl"]);
+  var id = "GAL-" + new Date().getTime();
+  sheet.appendRow([id, payload.judul, payload.mediaUrl]);
+  return { success: true };
 }
 
-function apiDeleteAdopsi(idTrans) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Adopsi");
-  if (!sheet) return { success: false, message: "Sheet Adopsi tidak ditemukan" };
+function apiSubmitTestimoni(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Testimoni") || ss.insertSheet("Testimoni");
+  if (sheet.getLastRow() === 0) sheet.appendRow(["id", "nama", "ras", "teks", "mediaUrl", "tanggal"]);
+  var id = "TST-" + new Date().getTime();
+  var tgl = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd");
+  sheet.appendRow([id, payload.nama, payload.ras, payload.teks, payload.mediaUrl, tgl]);
+  return { success: true, message: "Terima kasih atas ulasan Anda!" };
+}
+
+function apiDeleteTestimoni(id) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Testimoni");
+  if (!sheet) return { success: false };
   var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim() === String(idTrans).trim()) { sheet.deleteRow(i + 1); return { success: true, message: "Riwayat berhasil dihapus!" }; } } return { success: false, message: "Data tidak ditemukan!" };
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(id).trim()) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false };
 }
 
-function apiSaveKwitansiConfig(logoUrl, ttdUrl, namaPemilik) {
-  var props = PropertiesService.getScriptProperties(); props.setProperty('CONFIG_LOGO_URL', logoUrl || ''); props.setProperty('CONFIG_TTD_URL', ttdUrl || ''); props.setProperty('CONFIG_NAMA_PEMILIK', namaPemilik || 'TAKO BUNNY');
-  return { success: true, message: "Pengaturan Kwitansi berhasil disimpan!" };
+// =========================================================================
+// 7. FUNGSI KONFIGURASI KWITANSI & LABEL LOGISTIK
+// =========================================================================
+function apiSaveKwitansiConfig(payload) {
+  var sp = PropertiesService.getScriptProperties();
+  sp.setProperty("CFG_LOGO_URL", payload.logoUrl || "");
+  sp.setProperty("CFG_TTD_URL", payload.ttdUrl || "");
+  sp.setProperty("CFG_NAMA_PEMILIK", payload.namaPemilik || "TAKO BUNNY");
+  return { success: true };
 }
 
 function apiGetKwitansiData(adopsiId) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheetAdopsi = ss.getSheetByName("Adopsi"); var sheetKatalog = ss.getSheetByName("Katalog");
-  if (!sheetAdopsi) return { success: false, message: "Data tidak ditemukan." };
-  var dataA = sheetAdopsi.getDataRange().getValues(); var itemA = null;
-  for (var i = 1; i < dataA.length; i++) {
-    if (String(dataA[i][0]).trim() === String(adopsiId).trim()) {
-      var dobVal = dataA[i][15] ? String(dataA[i][15]) : ''; if (dataA[i][15] instanceof Date) dobVal = Utilities.formatDate(dataA[i][15], "GMT+7", "yyyy-MM-dd");
-      itemA = { id: dataA[i][0], tanggal: dataA[i][1], kelinciId: dataA[i][2], kelinciNama: dataA[i][3], kelinciRas: dataA[i][4], kelinciGender: dataA[i][5], harga: dataA[i][6], namaAdopter: dataA[i][7], waAdopter: dataA[i][8], provinsi: dataA[i][9], kota: dataA[i][10], alamat: dataA[i][11], ekspedisi: dataA[i][12], ongkir: dataA[i][13], catatan: dataA[i][14], dob: dobVal, tipeTransaksi: String(dataA[i][16] || 'Adopsi'), username: String(dataA[i][17] || ''), statusPelunasan: String(dataA[i][18] || 'Menunggu Pembayaran'), tglPelunasan: String(dataA[i][19] || ''), itemsProduk: String(dataA[i][20] || ''), totalSeluruh: String(dataA[i][21] || dataA[k][6] || '0'), ongkirAktual: String(dataA[i][24] || '0') }; break;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var adopsiSheet = ss.getSheetByName("Adopsi");
+  if (!adopsiSheet) return { success: false };
+  
+  var data = adopsiSheet.getDataRange().getValues();
+  var header = data[0];
+  var trxData = null;
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(adopsiId).trim()) {
+      trxData = {};
+      for (var j = 0; j < header.length; j++) {
+        trxData[header[j]] = data[i][j];
+      }
+      break;
     }
   }
-  if (!itemA) return { success: false, message: "Transaksi tidak ditemukan." };
-  var kelinciFotoUrl = ""; var kelinciWarna = "";
-  if (sheetKatalog) {
-    var dataK = sheetKatalog.getDataRange().getValues();
-    for (var j = 1; j < dataK.length; j++) {
-      if (String(dataK[j][0]).trim() === String(itemA.kelinciId).trim()) { kelinciWarna = dataK[j][4] || ""; kelinciFotoUrl = dataK[j][7] || ""; if (!itemA.dob && dataK[j][9]) itemA.dob = dataK[j][9] instanceof Date ? Utilities.formatDate(dataK[j][9], "GMT+7", "yyyy-MM-dd") : String(dataK[j][9]); break; }
-    }
-  }
-  var props = PropertiesService.getScriptProperties(); var config = { logoUrl: props.getProperty('CONFIG_LOGO_URL') || '', ttdUrl: props.getProperty('CONFIG_TTD_URL') || '', namaPemilik: props.getProperty('CONFIG_NAMA_PEMILIK') || 'TAKO BUNNY' }; return { success: true, data: itemA, kelinciFotoUrl: kelinciFotoUrl, kelinciWarna: kelinciWarna, config: config };
-}
-
-function apiUpdateOngkir(idTrans, nominalOngkir) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Adopsi");
-    if (!sheet) return { success: false, message: "Sheet Adopsi tidak ditemukan" };
-    var data = sheet.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]).trim() === String(idTrans).trim()) {
-        sheet.getRange(i + 1, 25).setValue(nominalOngkir);
-        return { success: true, message: "Ongkir berhasil diupdate" };
+  
+  if (!trxData) return { success: false, message: "Transaksi tidak ditemukan." };
+  
+  // Ambil detail warna dan foto kelinci dari Katalog
+  var kelinciWarna = "";
+  var kelinciFotoUrl = "";
+  var katSheet = ss.getSheetByName("Katalog");
+  if (katSheet && trxData.kelinciId) {
+    var kData = katSheet.getDataRange().getValues();
+    for (var k = 1; k < kData.length; k++) {
+      if (String(kData[k][0]).trim() === String(trxData.kelinciId).trim()) {
+        kelinciWarna = kData[k][4]; // Col warna
+        kelinciFotoUrl = kData[k][9]; // Col fotourl
+        break;
       }
     }
-    return { success: false, message: "Transaksi tidak ditemukan" };
-  } catch (e) { return { success: false, message: e.message }; }
-}
-
-// ====================================================================================
-// FUNGSI BARU UNTUK MENERIMA REQUEST DARI GITHUB LALU MENGIRIM BALIK DATA SEBAGAI JSON
-// ====================================================================================
-function doPost(e) {
-  try {
-    var req = JSON.parse(e.postData.contents);
-    var act = req.action;
-    var pay = req.payload;
-    var res = {};
-
-    if (act === 'apiUploadFile') res = apiUploadFile(pay.dataUrl, pay.filename);
-    else if (act === 'apiGetData') res = apiGetData();
-    else if (act === 'apiSubmitTestimoni') res = apiSubmitTestimoni(pay);
-    else if (act === 'apiDeleteTestimoni') res = apiDeleteTestimoni(pay);
-    else if (act === 'apiSubmitAdopsi') res = apiSubmitAdopsi(pay);
-    else if (act === 'apiAddProduk') res = apiAddProduk(pay);
-    else if (act === 'apiDeleteProduk') res = apiDeleteProduk(pay);
-    else if (act === 'apiUpdateStatusPengiriman') res = apiUpdateStatusPengiriman(pay.idTrans, pay.status, pay.resiUrl);
-    else if (act === 'apiUpdateStatusPelunasanManual') res = apiUpdateStatusPelunasanManual(pay.idTrans, pay.statusBaru);
-    else if (act === 'apiRegisterUser') res = apiRegisterUser(pay);
-    else if (act === 'apiLoginUser') res = apiLoginUser(pay.username, pay.password);
-    else if (act === 'apiForgotPassword') res = apiForgotPassword(pay);
-    else if (act === 'apiLoginAdmin') res = apiLoginAdmin(pay.user, pay.pass);
-    else if (act === 'apiAddKatalog') res = apiAddKatalog(pay);
-    else if (act === 'apiEditKatalog') res = apiEditKatalog(pay);
-    else if (act === 'apiDeleteKatalog') res = apiDeleteKatalog(pay);
-    else if (act === 'apiAddGaleri') res = apiAddGaleri(pay);
-    else if (act === 'apiDeleteAdopsi') res = apiDeleteAdopsi(pay);
-    else if (act === 'apiSaveKwitansiConfig') res = apiSaveKwitansiConfig(pay.logoUrl, pay.ttdUrl, pay.namaPemilik);
-    else if (act === 'apiGetKwitansiData') res = apiGetKwitansiData(pay);
-    else if (act === 'apiUpdateOngkir') res = apiUpdateOngkir(pay.idTrans, pay.nominalOngkir);
-
-    return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({success: false, message: err.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
+  
+  var sp = PropertiesService.getScriptProperties();
+  var config = {
+    logoUrl: sp.getProperty("CFG_LOGO_URL") || "",
+    ttdUrl: sp.getProperty("CFG_TTD_URL") || "",
+    namaPemilik: sp.getProperty("CFG_NAMA_PEMILIK") || "TAKO BUNNY"
+  };
+  
+  return {
+    success: true,
+    data: trxData,
+    kelinciWarna: kelinciWarna,
+    kelinciFotoUrl: kelinciFotoUrl,
+    config: config
+  };
 }
