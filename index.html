@@ -4,17 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TAKO BUNNY - Kelinci Hias Bandung</title>
-  <link rel="icon">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TAKO BUNNY - Kelinci Hias Bandung</title>
   
-  <!-- Tambahkan 1 baris kode ini untuk memunculkan logo di tab browser -->
+  <!-- Favicon Logo -->
   <link rel="icon" type="image/png" href="https://i.ibb.co.com/fzHz1P1Q/3-removebg-preview.png">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Tipografi -->
   
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Tipografi -->
@@ -288,9 +280,12 @@
     </div>
   </div>
 
+  <!-- MODAL DETAIL KATALOG DENGAN SLIDER MULTI MEDIA -->
   <div id="modal-detail-katalog" class="fixed inset-0 bg-earth/70 backdrop-blur-md z-[50] flex items-center justify-center p-4 hidden overflow-y-auto">
     <div class="bg-white rounded-[2rem] overflow-hidden max-w-3xl w-full shadow-floating relative max-h-[92vh] flex flex-col justify-between my-auto border border-peachdark/20"><button type="button" onclick="closeDetailModal()" class="absolute top-5 right-5 z-20 bg-white/70 backdrop-blur text-earth w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:scale-105 transition"><i class="ph-bold ph-x text-xl"></i></button>
-      <div class="relative bg-peach/20 flex items-center justify-center overflow-hidden max-h-[50vh]"><div id="detail-media-box" class="w-full h-full flex items-center justify-center"></div></div>
+      <div class="relative bg-peach/20 flex items-center justify-center overflow-hidden max-h-[50vh]">
+        <div id="detail-media-box" class="w-full h-full flex items-center justify-center relative"></div>
+      </div>
       <div class="p-8 sm:p-10 space-y-6 overflow-y-auto bg-white">
         <div class="flex flex-col sm:flex-row justify-between items-start gap-5"><div><div class="flex items-center gap-2 mb-2"><span id="detail-ras" class="text-xs font-bold text-earthlight uppercase tracking-widest bg-gray-100 px-2.5 py-1 rounded-md">RAS</span><span id="detail-status" class="text-xs font-bold px-2.5 py-1 rounded-md bg-mint text-mintdark">Tersedia</span></div><h3 id="detail-nama" class="text-3xl sm:text-4xl font-black text-earth font-title tracking-tight">Nama Kelinci</h3><p id="detail-id" class="text-xs text-earthlight font-bold mt-1 font-mono">ID: RAB-0000</p></div><div class="text-left sm:text-right w-full sm:w-auto"><div id="detail-harga-container"></div></div></div>
         <div class="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100 text-sm"><div class="bg-[#FAFAF9] p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center"><span class="text-earthlight text-[11px] font-bold uppercase tracking-wider mb-1">Gender</span><strong id="detail-gender" class="text-base text-earth font-title flex items-center gap-1.5">Jantan</strong></div><div class="bg-[#FAFAF9] p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center"><span class="text-earthlight text-[11px] font-bold uppercase tracking-wider mb-1">Warna</span><strong id="detail-warna" class="text-base text-earth font-title">Warna</strong></div><div class="bg-[#FAFAF9] p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center"><span class="text-earthlight text-[11px] font-bold uppercase tracking-wider mb-1">Usia / DOB</span><strong id="detail-dob" class="text-sm text-earth font-title leading-tight text-center">-</strong></div></div>
@@ -354,7 +349,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm space-y-5"><h4 class="font-title font-bold text-earth text-lg flex items-center gap-2"><i class="ph-duotone ph-plus-circle text-2xl text-gold"></i> Entri Kelinci Baru</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><input type="text" id="add-nama" placeholder="Nama Panggilan" class="input-elegant text-sm"><select id="add-ras" class="input-elegant text-sm"><option value="Netherland Dwarf">Netherland Dwarf</option><option value="Holland Lop">Holland Lop</option></select><select id="add-gender" class="input-elegant text-sm"><option value="Jantan">Jantan</option><option value="Betina">Betina</option></select><input type="text" id="add-warna" placeholder="Warna Corak" class="input-elegant text-sm"><div><span class="text-[10px] font-bold text-earthlight uppercase tracking-wider block mb-1.5">Tanggal Lahir (DOB)</span><input type="date" id="add-dob" class="input-elegant text-sm py-2"></div><select id="add-status" class="input-elegant text-sm mt-5"><option value="Tersedia">Tersedia</option><option value="Booked">Booked</option><option value="Adopted">Adopted</option></select><input type="number" id="add-harga-coret" placeholder="Harga Coret (Rp)" class="input-elegant text-sm"><input type="number" id="add-harga" placeholder="Harga Promo (Rp) *" class="input-elegant text-sm border-gold"><div class="col-span-full flex gap-3"><input type="text" id="add-foto-url" placeholder="URL Foto Drive/IBB" class="input-elegant text-sm w-full"><input type="file" id="file-add-kelinci" class="hidden" accept="image/*,video/*" onchange="handleFileUpload('file-add-kelinci', 'add-foto-url', 'btn-up-kelinci')"><button type="button" id="btn-up-kelinci" onclick="document.getElementById('file-add-kelinci').click()" class="bg-gray-100 px-5 rounded-xl text-earth font-bold text-lg hover:bg-gray-200 transition shadow-sm"><i class="ph-bold ph-upload-simple"></i></button></div></div><button type="button" onclick="addKatalog()" id="btn-add-katalog" class="w-full py-3 bg-earth text-white font-title font-bold text-sm rounded-xl shadow-soft hover:brightness-95 transition flex justify-center items-center gap-2"><i class="ph-bold ph-floppy-disk"></i> Simpan Kelinci</button></div>
+          <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm space-y-5"><h4 class="font-title font-bold text-earth text-lg flex items-center gap-2"><i class="ph-duotone ph-plus-circle text-2xl text-gold"></i> Entri Kelinci Baru</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><input type="text" id="add-nama" placeholder="Nama Panggilan" class="input-elegant text-sm"><select id="add-ras" class="input-elegant text-sm"><option value="Netherland Dwarf">Netherland Dwarf</option><option value="Holland Lop">Holland Lop</option></select><select id="add-gender" class="input-elegant text-sm"><option value="Jantan">Jantan</option><option value="Betina">Betina</option></select><input type="text" id="add-warna" placeholder="Warna Corak" class="input-elegant text-sm"><div><span class="text-[10px] font-bold text-earthlight uppercase tracking-wider block mb-1.5">Tanggal Lahir (DOB)</span><input type="date" id="add-dob" class="input-elegant text-sm py-2"></div><select id="add-status" class="input-elegant text-sm mt-5"><option value="Tersedia">Tersedia</option><option value="Booked">Booked</option><option value="Adopted">Adopted</option></select><input type="number" id="add-harga-coret" placeholder="Harga Coret (Rp)" class="input-elegant text-sm"><input type="number" id="add-harga" placeholder="Harga Promo (Rp) *" class="input-elegant text-sm border-gold"><div class="col-span-full flex gap-3"><input type="text" id="add-foto-url" placeholder="URL Foto/Video (Pisahkan koma jika banyak)" class="input-elegant text-sm w-full"><input type="file" id="file-add-kelinci" class="hidden" accept="image/*,video/*" onchange="handleFileUpload('file-add-kelinci', 'add-foto-url', 'btn-up-kelinci')"><button type="button" id="btn-up-kelinci" onclick="document.getElementById('file-add-kelinci').click()" class="bg-gray-100 px-5 rounded-xl text-earth font-bold text-lg hover:bg-gray-200 transition shadow-sm" title="Upload Media"><i class="ph-bold ph-upload-simple"></i></button></div></div><button type="button" onclick="addKatalog()" id="btn-add-katalog" class="w-full py-3 bg-earth text-white font-title font-bold text-sm rounded-xl shadow-soft hover:brightness-95 transition flex justify-center items-center gap-2"><i class="ph-bold ph-floppy-disk"></i> Simpan Kelinci</button></div>
           <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col"><h4 class="font-title font-bold text-earth text-lg flex items-center gap-2 mb-4"><i class="ph-duotone ph-list-dashes text-2xl text-rose-400"></i> Database Kelinci</h4><div class="overflow-y-auto flex-grow max-h-[380px] rounded-xl border border-gray-100"><table class="w-full text-xs text-left text-earth"><thead class="bg-[#FAFAF9] text-earthlight font-bold uppercase sticky top-0 text-[10px] shadow-sm"><tr><th class="p-3">Kode</th><th class="p-3">Info Kelinci</th><th class="p-3">Status</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody id="admin-table-katalog" class="divide-y divide-gray-50"><tr><td colspan="4" class="p-5 text-center text-gray-400">Memuat...</td></tr></tbody></table></div></div>
         </div>
 
@@ -375,7 +370,7 @@
     </div>
   </div>
 
-  <div id="modal-edit-katalog" class="fixed inset-0 bg-earth/70 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden"><div class="bg-white rounded-[2rem] p-8 max-w-lg w-full shadow-floating relative"><button type="button" onclick="closeEditModal()" class="absolute top-5 right-6 text-2xl text-gray-400 hover:text-earth transition"><i class="ph-bold ph-x"></i></button><h3 class="text-2xl font-bold text-earth mb-6 font-title flex items-center gap-2"><i class="ph-duotone ph-pencil-simple text-3xl text-gold"></i> Edit Data</h3><form onsubmit="submitEditKatalog(event)" class="space-y-4 text-sm"><input type="hidden" id="edit-id"><input type="text" id="edit-nama" required class="input-elegant" placeholder="Nama Kelinci"><div class="grid grid-cols-2 gap-4"><select id="edit-ras" class="input-elegant"><option value="Netherland Dwarf">Netherland Dwarf</option><option value="Holland Lop">Holland Lop</option></select><select id="edit-gender" class="input-elegant"><option value="Jantan">Jantan</option><option value="Betina">Betina</option></select></div><div class="grid grid-cols-2 gap-4"><input type="text" id="edit-warna" class="input-elegant" placeholder="Warna"><input type="date" id="edit-dob" class="input-elegant py-2" title="Tanggal Lahir"></div><div class="grid grid-cols-2 gap-4"><input type="number" id="edit-harga-coret" class="input-elegant" placeholder="Harga Asli"><input type="number" id="edit-harga" required class="input-elegant font-bold border-gold" placeholder="Harga Promo"></div><select id="edit-status" class="input-elegant"><option value="Tersedia">Tersedia</option><option value="Booked">Booked</option><option value="Adopted">Adopted</option></select><div class="flex gap-3"><input type="text" id="edit-foto-url" class="input-elegant w-full" placeholder="URL Foto"><input type="file" id="file-edit-kelinci" class="hidden" accept="image/*,video/*" onchange="handleFileUpload('file-edit-kelinci', 'edit-foto-url', 'btn-up-edit-kel')"><button type="button" id="btn-up-edit-kel" onclick="document.getElementById('file-edit-kelinci').click()" class="bg-gray-100 px-4 rounded-xl text-earth font-bold text-lg hover:bg-gray-200 transition"><i class="ph-bold ph-upload-simple"></i></button></div><button type="submit" id="btn-submit-edit" class="w-full py-3.5 bg-earth text-white font-title font-bold rounded-xl mt-4 shadow-soft hover:bg-earth/90 transition text-base">Simpan Perubahan</button></form></div></div>
+  <div id="modal-edit-katalog" class="fixed inset-0 bg-earth/70 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden"><div class="bg-white rounded-[2rem] p-8 max-w-lg w-full shadow-floating relative"><button type="button" onclick="closeEditModal()" class="absolute top-5 right-6 text-2xl text-gray-400 hover:text-earth transition"><i class="ph-bold ph-x"></i></button><h3 class="text-2xl font-bold text-earth mb-6 font-title flex items-center gap-2"><i class="ph-duotone ph-pencil-simple text-3xl text-gold"></i> Edit Data</h3><form onsubmit="submitEditKatalog(event)" class="space-y-4 text-sm"><input type="hidden" id="edit-id"><input type="text" id="edit-nama" required class="input-elegant" placeholder="Nama Kelinci"><div class="grid grid-cols-2 gap-4"><select id="edit-ras" class="input-elegant"><option value="Netherland Dwarf">Netherland Dwarf</option><option value="Holland Lop">Holland Lop</option></select><select id="edit-gender" class="input-elegant"><option value="Jantan">Jantan</option><option value="Betina">Betina</option></select></div><div class="grid grid-cols-2 gap-4"><input type="text" id="edit-warna" class="input-elegant" placeholder="Warna"><input type="date" id="edit-dob" class="input-elegant py-2" title="Tanggal Lahir"></div><div class="grid grid-cols-2 gap-4"><input type="number" id="edit-harga-coret" class="input-elegant" placeholder="Harga Asli"><input type="number" id="edit-harga" required class="input-elegant font-bold border-gold" placeholder="Harga Promo"></div><select id="edit-status" class="input-elegant"><option value="Tersedia">Tersedia</option><option value="Booked">Booked</option><option value="Adopted">Adopted</option></select><div class="flex gap-3"><input type="text" id="edit-foto-url" class="input-elegant w-full" placeholder="URL Foto/Video (Pisahkan koma)"><input type="file" id="file-edit-kelinci" class="hidden" accept="image/*,video/*" onchange="handleFileUpload('file-edit-kelinci', 'edit-foto-url', 'btn-up-edit-kel')"><button type="button" id="btn-up-edit-kel" onclick="document.getElementById('file-edit-kelinci').click()" class="bg-gray-100 px-4 rounded-xl text-earth font-bold text-lg hover:bg-gray-200 transition"><i class="ph-bold ph-upload-simple"></i></button></div><button type="submit" id="btn-submit-edit" class="w-full py-3.5 bg-earth text-white font-title font-bold rounded-xl mt-4 shadow-soft hover:bg-earth/90 transition text-base">Simpan Perubahan</button></form></div></div>
   <div id="modal-form-resi" class="fixed inset-0 bg-earth/70 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden"><div class="bg-white rounded-[2rem] p-8 max-w-sm w-full relative shadow-floating text-center border border-gray-100"><div class="w-16 h-16 bg-blue-50/80 rounded-2xl flex items-center justify-center text-blue-500 text-3xl mx-auto mb-4 border border-blue-100"><i class="ph-duotone ph-truck"></i></div><h3 class="font-title text-xl font-bold text-earth mb-2">Upload Bukti Resi</h3><p class="text-[11px] text-earthlight mb-6">Lampirkan foto resi logistik agar klien dapat melacak paket kelinci mereka.</p><input type="hidden" id="resi-id-trans"><div class="flex gap-3 mb-6"><input type="text" id="resi-url-input" placeholder="URL Gambar Resi" class="input-elegant text-sm w-full"><input type="file" id="file-upload-resi" class="hidden" accept="image/*" onchange="handleFileUpload('file-upload-resi', 'resi-url-input', 'btn-upload-resi-file')"><button type="button" id="btn-upload-resi-file" onclick="document.getElementById('file-upload-resi').click()" class="bg-gray-100 px-4 rounded-xl hover:bg-gray-200 text-earth text-lg"><i class="ph-bold ph-upload-simple"></i></button></div><div class="flex gap-3"><button type="button" onclick="closeFormResi()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl text-sm hover:bg-gray-200">Batal</button><button type="button" onclick="submitFormResi()" class="flex-1 py-3 bg-blue-500 text-white font-bold rounded-xl shadow-sm text-sm hover:bg-blue-600">Simpan Status</button></div></div></div>
   <div id="modal-view-resi" class="fixed inset-0 bg-earth/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 hidden"><div class="bg-white rounded-[2rem] p-5 max-w-md w-full relative shadow-2xl flex flex-col items-center"><button type="button" onclick="closeResiModal()" class="absolute top-5 right-5 text-2xl text-gray-600 hover:text-earth bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow-sm"><i class="ph-bold ph-x"></i></button><div class="w-full bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center p-2 min-h-[300px]"><img id="modal-resi-img" src="" class="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-sm"></div></div></div>
   <div id="modal-config-kwitansi" class="fixed inset-0 bg-earth/70 backdrop-blur-md z-[80] flex items-center justify-center p-4 hidden"><div class="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-floating relative"><button type="button" onclick="closeConfigKwitansiModal()" class="absolute top-5 right-6 text-2xl text-gray-400 hover:text-earth"><i class="ph-bold ph-x"></i></button><h3 class="text-2xl font-bold text-earth mb-6 font-title flex items-center gap-2"><i class="ph-duotone ph-file-text text-3xl text-gold"></i> Setup Dokumen</h3><form onsubmit="saveKwitansiConfig(event)" class="space-y-5 text-sm"><div><label class="block font-bold text-earthlight text-xs mb-1.5 uppercase tracking-wide">Logo Merek</label><div class="flex gap-3"><input type="text" id="cfg-logo-url" class="input-elegant w-full"><input type="file" id="file-cfg-logo" class="hidden" accept="image/*" onchange="handleFileUpload('file-cfg-logo', 'cfg-logo-url', 'btn-up-logo')"><button type="button" id="btn-up-logo" onclick="document.getElementById('file-cfg-logo').click()" class="bg-gray-100 px-4 text-lg rounded-xl hover:bg-gray-200"><i class="ph-bold ph-upload-simple"></i></button></div></div><div><label class="block font-bold text-earthlight text-xs mb-1.5 uppercase tracking-wide">Tanda Tangan Digital</label><div class="flex gap-3"><input type="text" id="cfg-ttd-url" class="input-elegant w-full"><input type="file" id="file-cfg-ttd" class="hidden" accept="image/*" onchange="handleFileUpload('file-cfg-ttd', 'cfg-ttd-url', 'btn-up-ttd')"><button type="button" id="btn-up-ttd" onclick="document.getElementById('file-cfg-ttd').click()" class="bg-gray-100 px-4 text-lg rounded-xl hover:bg-gray-200"><i class="ph-bold ph-upload-simple"></i></button></div></div><div><label class="block font-bold text-earthlight text-xs mb-1.5 uppercase tracking-wide">Nama Penandatangan</label><input type="text" id="cfg-nama-pemilik" class="input-elegant"></div><button type="submit" id="btn-save-cfg" class="w-full py-3.5 bg-earth text-white font-title font-bold text-base rounded-xl shadow-soft mt-2 flex justify-center items-center gap-2"><i class="ph-bold ph-floppy-disk"></i> Simpan Konfigurasi</button></form></div></div>
@@ -389,16 +384,14 @@
 
   <script>
     // =========================================================================
-    // WAJIB DIISI SEBELUM UPLOAD KE GITHUB !!!
-    // Masukkan URL Web App dari Google Apps Script di dalam tanda kutip di bawah:
+    // URL WEB APP GOOGLE APPS SCRIPT
     // =========================================================================
-    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9NbtgHxMh3ZFWnAwFB5WtO8vF6RtW0LpD05JBwRVOoACgFBTs7Dvr5Q0V3DCuDcJ9hQ/exec"; 
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxYs-PlCFBhYxsWcXTkuVubexJ_pDPLtmhjcw14QQcgUibSdWSD5kvGVXL5uCRptCwp9Q/exec"; 
 
     var ADMIN_WA_NUMBER = "6287715306568";
     var stateKatalog = []; var stateGaleri = []; var stateProduk = []; var stateAdopsi = []; var stateTestimoni = [];
     var currentUser = null; var pendingAdopsiTarget = null; var currentFilter = 'All'; var currentSort = 'default';
 
-    // FUNGSI PENGHUBUNG FRONTEND (GITHUB) KE BACKEND (GOOGLE SCRIPT)
     function callBackend(action, payload, onSuccess, onFailure) {
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -419,7 +412,14 @@
       reader.onload = function(e) {
         callBackend('apiUploadFile', {dataUrl: e.target.result, filename: file.name}, function(res) {
           btn.innerHTML = originalText; btn.disabled = false; fileInput.value = ""; 
-          if (res && res.success) { var urlField = document.getElementById(urlInputId); if (urlField.tagName.toLowerCase() === 'textarea' && urlField.value) urlField.value += "," + res.url; else urlField.value = res.url; } 
+          if (res && res.success) { 
+            var urlField = document.getElementById(urlInputId); 
+            if (urlField.value && urlField.value.trim() !== '') {
+              urlField.value = urlField.value.trim() + ',' + res.url;
+            } else {
+              urlField.value = res.url; 
+            }
+          } 
           else alert(res ? res.message : "Gagal upload.");
         }, function(err) { btn.innerHTML = originalText; btn.disabled = false; fileInput.value = ""; alert("Gagal jaringan."); });
       }; reader.readAsDataURL(file);
@@ -519,7 +519,7 @@
     function userLogout() { if (confirm("Keluar dari akun?")) { currentUser = null; sessionStorage.removeItem('takobunny_user'); updateNavUserUI(); showSection('landing'); } }
 
     function fetchData() {
-      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "ISI_URL_WEB_APP_ANDA_DISINI") return;
+      if (!APPS_SCRIPT_URL) return;
       callBackend('apiGetData', null, function(data) {
         stateKatalog = (data && data.katalog) ? data.katalog : []; stateGaleri = (data && data.galeri) ? data.galeri : [];
         stateProduk = (data && data.produk) ? data.produk : []; stateAdopsi = (data && data.adopsi) ? data.adopsi : []; stateTestimoni = (data && data.testimoni) ? data.testimoni : [];
@@ -583,7 +583,11 @@
         var sisaHalf = grandTotal - dpHalf;
         
         var kelinciObj = stateKatalog.find(function(k) { return String(k.id).trim() === String(item.kelinciId).trim(); });
-        var fotoUrlFix = kelinciObj ? fixImageUrl(kelinciObj.fotourl) : '';
+        var fotoUrlFix = '';
+        if (kelinciObj && kelinciObj.fotourl) {
+          var firstImg = kelinciObj.fotourl.split(',')[0].trim();
+          fotoUrlFix = fixImageUrl(firstImg);
+        }
 
         var statusPelunasan = item.statusPelunasan || "Menunggu Pembayaran";
         var isLunas = (statusPelunasan === "Lunas");
@@ -686,10 +690,21 @@
         var genderBadge = isMale ? '<span class="text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100"><i class="ph-bold ph-gender-male"></i> Jantan</span>' : '<span class="text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 bg-pink-50 text-pink-600 border border-pink-100"><i class="ph-bold ph-gender-female"></i> Betina</span>';
         var isAvail = (item.status || '').toLowerCase() === 'tersedia' || (item.status || '').toLowerCase() === 'available'; var isBooked = (item.status || '').toLowerCase() === 'booked'; var isBookingMode = isAvail && (getAgeInDays(item.dob) >= 0 && getAgeInDays(item.dob) < 50);
         var hPromo = Number(item.harga || 0); var hAsli = Number(item.hargaCoret || 0); var disc = hAsli > hPromo ? Math.round(((hAsli - hPromo) / hAsli) * 100) : 0;
-        var firstMediaUrl = (item.fotourl || '').split(',')[0] || '';
+        
+        var mediaList = (item.fotourl || '').split(',').map(function(m){ return m.trim(); }).filter(function(m){ return m !== ''; });
+        var firstMediaUrl = mediaList.length > 0 ? mediaList[0] : '';
+        var totalMediaCount = mediaList.length;
+
         html += '<div class="bg-white rounded-[2rem] overflow-hidden card-elegant flex flex-col justify-between group cursor-pointer relative" onclick="openDetailModal(\'' + item.id + '\')">';
         if (disc > 0) html += '<div class="absolute top-4 right-4 z-20 badge-discount px-3 py-1.5 rounded-lg font-title text-[11px] font-bold flex items-center gap-1.5 shadow-sm"><i class="ph-fill ph-fire"></i> ' + disc + '% OFF</div>';
-        html += '<div class="relative h-64 bg-peach/30 overflow-hidden flex items-center justify-center p-2"><div class="w-full h-full rounded-[1.5rem] overflow-hidden relative">' + createMediaHtml(firstMediaUrl, item.nama, 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out') + '<div class="absolute bottom-3 left-3 flex gap-2 z-10 flex-wrap">' + genderBadge;
+        
+        html += '<div class="relative h-64 bg-peach/30 overflow-hidden flex items-center justify-center p-2"><div class="w-full h-full rounded-[1.5rem] overflow-hidden relative">' + createMediaHtml(firstMediaUrl, item.nama, 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out');
+        
+        if (totalMediaCount > 1) {
+          html += '<div class="absolute top-3 left-3 bg-earth/80 text-white backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 z-10"><i class="ph-bold ph-images"></i> ' + totalMediaCount + ' Media</div>';
+        }
+
+        html += '<div class="absolute bottom-3 left-3 flex gap-2 z-10 flex-wrap">' + genderBadge;
         if (isAvail) html += '<span class="text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm border ' + (isBookingMode ? 'bg-orange-50/90 backdrop-blur text-orange-600 border-orange-200' : 'bg-white/90 backdrop-blur text-mintdark border-white') + '"><i class="ph-fill ' + (isBookingMode ? 'ph-star' : 'ph-check-circle') + '"></i> ' + (isBookingMode ? 'Siap Booking' : 'Tersedia') + '</span>'; else if (isBooked) html += '<span class="text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm bg-gray-800/90 backdrop-blur text-white border-transparent"><i class="ph-fill ph-lock-key"></i> Booked</span>'; else html += '<span class="text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm bg-gray-100/90 backdrop-blur text-gray-500 border border-gray-200"><i class="ph-fill ph-house-line"></i> Adopted</span>';
         html += '</div></div></div><div class="p-6 space-y-4 flex-grow flex flex-col justify-between"><div><div class="flex justify-between items-center mb-1.5"><span class="text-[10px] font-bold text-earthlight uppercase tracking-widest">' + item.ras + '</span>';
         if (calculateAgeOrDob(item.dob) !== '-') html += '<span class="text-earthlight flex items-center gap-1.5 text-[11px] font-bold"><i class="ph-fill ph-cake text-gold"></i> ' + calculateAgeOrDob(item.dob) + '</span>';
@@ -702,9 +717,17 @@
       container.innerHTML = html;
     }
 
+    var currentMediaList = [];
+    var currentMediaIndex = 0;
+
     function openDetailModal(id) {
       var item = stateKatalog.find(function(k) { return String(k.id).trim() === String(id).trim(); }); if (!item) return;
       document.getElementById('detail-id').innerText = 'ID: ' + item.id; document.getElementById('detail-nama').innerText = item.nama; document.getElementById('detail-ras').innerText = item.ras;
+      
+      currentMediaList = (item.fotourl || '').split(',').map(function(m){ return m.trim(); }).filter(function(m){ return m !== ''; });
+      currentMediaIndex = 0;
+      renderDetailMediaView();
+
       var isBookingMode = (item.status || '').toLowerCase() === 'tersedia' && (getAgeInDays(item.dob) >= 0 && getAgeInDays(item.dob) < 50); var hargaHtml = '';
       if (item.hargaCoret > item.harga) { var disc = Math.round(((item.hargaCoret - item.harga) / item.hargaCoret) * 100); hargaHtml += '<span class="text-sm text-red-400 line-through block font-bold mb-1">Rp ' + Number(item.hargaCoret).toLocaleString('id-ID') + '</span><div class="font-title text-3xl font-black text-earth flex items-center gap-3">Rp ' + Number(item.harga).toLocaleString('id-ID') + ' <span class="text-xs bg-red-100 text-red-600 font-bold px-2 py-1 rounded-md border border-red-200">-' + disc + '%</span></div>'; } 
       else hargaHtml += '<div class="font-title text-3xl font-black text-earth">Rp ' + Number(item.harga).toLocaleString('id-ID') + '</div>';
@@ -715,11 +738,41 @@
       var isAvail = (item.status || '').toLowerCase() === 'tersedia'; var statusEl = document.getElementById('detail-status');
       if (isAvail) { statusEl.innerHTML = isBookingMode ? '<i class="ph-fill ph-star"></i> Siap Booking' : '<i class="ph-fill ph-check-circle"></i> Tersedia'; statusEl.className = isBookingMode ? "text-xs font-bold px-2.5 py-1 rounded-md bg-orange-100 text-orange-800 flex items-center gap-1.5" : "text-xs font-bold px-2.5 py-1 rounded-md bg-mint text-mintdark flex items-center gap-1.5"; } 
       else { statusEl.innerHTML = '<i class="ph-fill ph-lock-key"></i> ' + item.status; statusEl.className = "text-xs font-bold px-2.5 py-1 rounded-md bg-gray-200 text-gray-600 flex items-center gap-1.5"; }
-      document.getElementById('detail-media-box').innerHTML = createMediaHtml((item.fotourl || '').split(',')[0], item.nama, 'max-h-[45vh] w-auto max-w-full object-contain');
+      
       var actionBtnContainer = document.getElementById('detail-action-btn');
       if (isAvail) actionBtnContainer.innerHTML = '<button type="button" onclick="openAdopsiModal(\'' + item.id + '\', \'' + item.nama + '\', \'' + item.ras + '\', \'' + item.gender + '\', \'' + item.harga + '\', \'' + (item.dob || '') + '\')" class="w-full py-4 ' + (isBookingMode ? 'bg-gold' : 'bg-earth') + ' text-white font-title font-bold text-base rounded-2xl shadow-soft hover:brightness-95 transition flex justify-center items-center gap-2">' + (isBookingMode ? '<i class="ph-bold ph-bookmark-simple text-xl"></i> Booking Sekarang (DP 50%)' : '<i class="ph-bold ph-paw-print text-xl"></i> Adopsi Sekarang') + '</button>'; 
       else actionBtnContainer.innerHTML = '<button disabled class="w-full py-4 bg-[#FAFAF9] text-gray-400 font-title font-bold text-base border border-gray-100 rounded-2xl cursor-not-allowed flex justify-center items-center gap-2"><i class="ph-bold ph-lock-key text-xl"></i> Status ' + item.status + '</button>';
       document.getElementById('modal-detail-katalog').classList.remove('hidden');
+    }
+
+    function renderDetailMediaView() {
+      var box = document.getElementById('detail-media-box'); if (!box) return;
+      if (currentMediaList.length === 0) {
+        box.innerHTML = '<div class="w-full h-64 flex items-center justify-center text-gray-400">Tidak ada media</div>';
+        return;
+      }
+      var currentUrl = currentMediaList[currentMediaIndex];
+      var mediaHtml = createMediaHtml(currentUrl, 'Detail Kelinci', 'max-h-[45vh] w-auto max-w-full object-contain');
+      
+      var controlsHtml = '';
+      if (currentMediaList.length > 1) {
+        controlsHtml = '<button type="button" onclick="prevDetailMedia()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-earth p-2 rounded-full shadow-md transition z-10"><i class="ph-bold ph-caret-left text-lg"></i></button>' +
+                       '<button type="button" onclick="nextDetailMedia()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-earth p-2 rounded-full shadow-md transition z-10"><i class="ph-bold ph-caret-right text-lg"></i></button>' +
+                       '<div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-earth/70 text-white px-3 py-1 rounded-full text-xs font-bold z-10">' + (currentMediaIndex + 1) + ' / ' + currentMediaList.length + '</div>';
+      }
+      box.innerHTML = mediaHtml + controlsHtml;
+    }
+
+    function prevDetailMedia() {
+      if (currentMediaList.length <= 1) return;
+      currentMediaIndex = (currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length;
+      renderDetailMediaView();
+    }
+
+    function nextDetailMedia() {
+      if (currentMediaList.length <= 1) return;
+      currentMediaIndex = (currentMediaIndex + 1) % currentMediaList.length;
+      renderDetailMediaView();
     }
 
     function closeDetailModal() { document.getElementById('modal-detail-katalog').classList.add('hidden'); }
@@ -849,7 +902,9 @@
         if (!res || !res.success) return; var d = res.data; var cfg = res.config; var isBooking = (d.tipeTransaksi === "Booking"); var isLunas = (d.statusPelunasan === "Lunas");
         document.getElementById('kwt-no').innerText = d.id; document.getElementById('kwt-tgl').innerText = "Tgl: " + d.tanggal.split(' ')[0]; document.getElementById('kwt-adopter-nama').innerText = d.namaAdopter; document.getElementById('kwt-adopter-kota').innerText = d.kota; document.getElementById('kwt-adopter-wa').innerText = fixPhoneNumber(d.waAdopter); document.getElementById('kwt-ekspedisi').innerHTML = '<i class="ph-bold ph-truck inline align-middle mr-1"></i> ' + d.ekspedisi;
         var dobText = calculateAgeOrDob(d.dob) !== '-' ? formatDisplayDate(d.dob) + ' (' + calculateAgeOrDob(d.dob) + ')' : '-'; var warnaText = res.kelinciWarna || '-';
-        var itemsHtml = '<tr><td class="py-4 px-2 flex items-center gap-3"><img src="' + (res.kelinciFotoUrl ? fixImageUrl(res.kelinciFotoUrl) : 'https://via.placeholder.com/150') + '" class="w-14 h-14 object-cover rounded-xl shadow-sm border border-gray-100"><div><strong class="text-sm text-earth block">' + d.kelinciNama + '</strong><span class="text-[10px] text-earthlight font-bold uppercase tracking-widest mt-0.5 block">' + d.kelinciRas + '</span></div></td><td class="py-4 px-2 align-middle text-xs text-earthlight font-semibold">Gender: ' + d.kelinciGender + '<br>Warna: ' + warnaText + '<br>DOB: ' + dobText + '</td><td class="py-4 px-2 text-right font-bold text-sm text-earth align-middle">' + d.harga + '</td></tr>';
+        
+        var firstKelinciFoto = res.kelinciFotoUrl ? res.kelinciFotoUrl.split(',')[0].trim() : '';
+        var itemsHtml = '<tr><td class="py-4 px-2 flex items-center gap-3"><img src="' + (firstKelinciFoto ? fixImageUrl(firstKelinciFoto) : 'https://via.placeholder.com/150') + '" class="w-14 h-14 object-cover rounded-xl shadow-sm border border-gray-100"><div><strong class="text-sm text-earth block">' + d.kelinciNama + '</strong><span class="text-[10px] text-earthlight font-bold uppercase tracking-widest mt-0.5 block">' + d.kelinciRas + '</span></div></td><td class="py-4 px-2 align-middle text-xs text-earthlight font-semibold">Gender: ' + d.kelinciGender + '<br>Warna: ' + warnaText + '<br>DOB: ' + dobText + '</td><td class="py-4 px-2 text-right font-bold text-sm text-earth align-middle">' + d.harga + '</td></tr>';
         
         if (d.itemsProduk) itemsHtml += '<tr class="bg-[#FAFAF9]"><td class="py-3 px-3 flex items-center gap-2 text-earthlight border-t border-gray-100"><i class="ph-fill ph-package text-gold"></i><strong class="text-[11px] text-earth uppercase tracking-widest">Add-ons Starter Kit</strong></td><td class="py-3 px-2 text-[11px] text-earthlight font-semibold border-t border-gray-100 leading-relaxed">' + d.itemsProduk + '</td><td class="py-3 px-2 text-right font-bold text-[11px] text-earthlight border-t border-gray-100">Included</td></tr>';
         
@@ -893,7 +948,12 @@
       callBackend('apiGetKwitansiData', adopsiId, function(res) {
         if (!res || !res.success) return; var d = res.data; var cfg = res.config; document.getElementById('lbl-logo').src = cfg.logoUrl ? fixImageUrl(cfg.logoUrl) : 'https://lh3.googleusercontent.com/d/1ir7XVNU5YuXJjgyvUXvzthW4DL89Fvle'; document.getElementById('lbl-nama-toko').innerText = cfg.namaPemilik || 'TAKO BUNNY'; document.getElementById('lbl-ekspedisi').innerText = d.ekspedisi || '-'; document.getElementById('lbl-penerima-nama').innerText = d.namaAdopter || '-'; document.getElementById('lbl-penerima-hp').innerText = fixPhoneNumber(d.waAdopter); document.getElementById('lbl-penerima-alamat').innerText = d.alamat || '-'; document.getElementById('lbl-penerima-kota').innerText = (d.kota || '') + " - " + (d.provinsi || '');
         var dobText = calculateAgeOrDob(d.dob) !== '-' ? formatDisplayDate(d.dob) : '-'; var warnaText = res.kelinciWarna || '-'; var isiPaket = d.kelinciNama + " (" + d.kelinciRas + " | " + (d.kelinciGender || "-") + " | Warna: " + warnaText + " | DOB: " + dobText + ")\n";
-        if (d.itemsProduk) isiPaket += "\nPERLENGKAPAN:\n" + d.itemsProduk.replace(/-/g, "•"); document.getElementById('lbl-isi-paket').innerText = isiPaket; document.getElementById('lbl-foto-kelinci').src = res.kelinciFotoUrl ? fixImageUrl(res.kelinciFotoUrl) : 'https://via.placeholder.com/150'; document.getElementById('lbl-catatan').innerText = d.catatan ? "Catatan Khusus: " + d.catatan : ""; document.getElementById('modal-label-view').classList.remove('hidden');
+        if (d.itemsProduk) isiPaket += "\nPERLENGKAPAN:\n" + d.itemsProduk.replace(/-/g, "•"); document.getElementById('lbl-isi-paket').innerText = isiPaket; 
+        
+        var firstLblFoto = res.kelinciFotoUrl ? res.kelinciFotoUrl.split(',')[0].trim() : '';
+        document.getElementById('lbl-foto-kelinci').src = firstLblFoto ? fixImageUrl(firstLblFoto) : 'https://via.placeholder.com/150'; 
+        
+        document.getElementById('lbl-catatan').innerText = d.catatan ? "Catatan Khusus: " + d.catatan : ""; document.getElementById('modal-label-view').classList.remove('hidden');
       });
     }
     function closeLabelView() { document.getElementById('modal-label-view').classList.add('hidden'); }
