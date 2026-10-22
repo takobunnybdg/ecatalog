@@ -494,7 +494,40 @@
   function formatDisplayDate(dobStr) { if (!dobStr) return '-'; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return dobStr; var bln = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"]; return dobDate.getDate() + " " + bln[dobDate.getMonth()] + " " + dobDate.getFullYear(); }
   function formatTanggalIndo(tglStr) { if (!tglStr) return '-'; var c = String(tglStr).split(' ')[0].trim(); if (c.indexOf('/') !== -1) { var p = c.split('/'); if (p.length === 3) { var bln = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]; var m = parseInt(p[1], 10); if (m >= 1 && m <= 12) return parseInt(p[0], 10) + ' ' + bln[m - 1] + ' ' + p[2]; } } return c; }
   function fixPhoneNumber(phone) { if (!phone) return ''; var str = String(phone).trim(); if (str.length > 0 && str.indexOf('0') !== 0 && str.indexOf('62') !== 0) str = '0' + str; return str; }
-  function createMediaHtml(url, altText, extraClass) { var cleanUrl = fixImageUrl(url); if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>'; var lower = cleanUrl.toLowerCase(); if (lower.indexOf('tiktok.com') !== -1) { var m = cleanUrl.match(/\/video\/(\d+)/); if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>'; } if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) { var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0]; return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>'; } if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" autoplay loop muted playsinline controls></video>'; return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">'; }
+function createMediaHtml(url, altText, extraClass) {
+    var cleanUrl = fixImageUrl(url);
+    if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>';
+    
+    var lower = cleanUrl.toLowerCase();
+    
+    // Embed TikTok
+    if (lower.indexOf('tiktok.com') !== -1) {
+      var m = cleanUrl.match(/\/video\/(\d+)/);
+      if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>';
+    }
+    
+    // Embed YouTube
+    if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) {
+      var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0];
+      return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>';
+    }
+    
+    // Pemutar Video (.mp4, .webm, .mov)
+    if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) {
+      // PERBAIKAN: Jika video berasal dari Google Drive, gunakan Google Preview Player agar tidak blank
+      if (lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) {
+        var idMatch = cleanUrl.match(/[\w-]{25,}/);
+        if (idMatch && idMatch[0]) {
+          return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" frameborder="0" allow="autoplay" allowfullscreen></iframe>';
+        }
+      }
+      // Jika dari server luar, gunakan tag video normal
+      return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" autoplay loop muted playsinline controls></video>';
+    }
+    
+    // Standar render Gambar
+    return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">';
+  }
 
   window.addEventListener('DOMContentLoaded', function() { var saved = sessionStorage.getItem('takobunny_user'); if (saved) { try { currentUser = JSON.parse(saved); } catch(e){} } fetchData(); });
   function updateNavUserUI() { var box = document.getElementById('nav-user-box'); if (!box) return; if (currentUser) { var userUsername = String(currentUser.username).trim().toLowerCase(); var userWa = fixPhoneNumber(currentUser.noHp); var count = stateAdopsi.filter(function(a) { return (a.username && String(a.username).trim().toLowerCase() === userUsername) || (userWa && fixPhoneNumber(a.waAdopter) === userWa); }).length; var badgeHtml = count > 0 ? '<span class="bg-gold text-white px-2 py-0.5 rounded-md text-[11px] font-black ml-1.5 shadow-sm">' + count + '</span>' : ''; box.innerHTML = '<button type="button" onclick="showSection(\'kelinciku\')" class="btn-elegant px-4 py-2 rounded-xl font-title text-xs sm:text-sm font-bold bg-rose text-earth shadow-sm hover:brightness-95 border border-rose-300"><i class="ph-duotone ph-shopping-bag text-lg"></i> Kelinciku' + badgeHtml + '</button><div class="flex items-center gap-2 text-sm font-bold text-earth bg-peach/50 px-3 py-2 rounded-xl border border-peachdark/30"><i class="ph-fill ph-user-circle text-xl text-gold"></i><span>' + (currentUser.nama || currentUser.username).split(' ')[0] + '</span><button type="button" onclick="userLogout()" class="text-gray-400 hover:text-red-500 ml-1 transition-colors"><i class="ph-bold ph-sign-out text-lg"></i></button></div>'; } else box.innerHTML = '<button type="button" onclick="openAuthModal()" id="btn-nav-auth" class="btn-elegant px-5 py-2.5 rounded-xl font-title text-xs sm:text-sm font-bold border-2 border-peachdark text-earth hover:bg-peach"><i class="ph-duotone ph-user-circle text-lg"></i> Masuk</button>'; }
