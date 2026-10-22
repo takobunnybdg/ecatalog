@@ -494,39 +494,45 @@
   function formatDisplayDate(dobStr) { if (!dobStr) return '-'; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return dobStr; var bln = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"]; return dobDate.getDate() + " " + bln[dobDate.getMonth()] + " " + dobDate.getFullYear(); }
   function formatTanggalIndo(tglStr) { if (!tglStr) return '-'; var c = String(tglStr).split(' ')[0].trim(); if (c.indexOf('/') !== -1) { var p = c.split('/'); if (p.length === 3) { var bln = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]; var m = parseInt(p[1], 10); if (m >= 1 && m <= 12) return parseInt(p[0], 10) + ' ' + bln[m - 1] + ' ' + p[2]; } } return c; }
   function fixPhoneNumber(phone) { if (!phone) return ''; var str = String(phone).trim(); if (str.length > 0 && str.indexOf('0') !== 0 && str.indexOf('62') !== 0) str = '0' + str; return str; }
-function createMediaHtml(url, altText, extraClass) {
-    var cleanUrl = fixImageUrl(url);
-    if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>';
-    
-    var lower = cleanUrl.toLowerCase();
-    
-    // Embed TikTok
-    if (lower.indexOf('tiktok.com') !== -1) {
-      var m = cleanUrl.match(/\/video\/(\d+)/);
-      if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>';
-    }
-    
-    // Embed YouTube
-    if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) {
-      var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0];
-      return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>';
-    }
-    
-    // Pemutar Video (.mp4, .webm, .mov)
-    if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) {
-      // PERBAIKAN: Jika video berasal dari Google Drive, gunakan Google Preview Player agar tidak blank
-      if (lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) {
-        var idMatch = cleanUrl.match(/[\w-]{25,}/);
-        if (idMatch && idMatch[0]) {
-          return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" frameborder="0" allow="autoplay" allowfullscreen></iframe>';
-        }
+function createMediaHtml(url, altText, extraClass) { 
+  var cleanUrl = fixImageUrl(url); 
+  if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>'; 
+  
+  var lower = cleanUrl.toLowerCase(); 
+  
+  // Trik Deteksi: Apakah ini di halaman depan (katalog) atau di dalam pop-up detail?
+  var isThumbnail = (extraClass && extraClass.indexOf('group-hover') !== -1);
+  
+  if (lower.indexOf('tiktok.com') !== -1) { 
+    var m = cleanUrl.match(/\/video\/(\d+)/); 
+    if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>'; 
+  } 
+  
+  if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) { 
+    var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0]; 
+    return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>'; 
+  } 
+  
+  if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) { 
+    var idMatch = cleanUrl.match(/[\w-]{25,}/); 
+    if ((lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) && idMatch && idMatch[0]) {
+      
+      if (isThumbnail) {
+         // 1. MODE KATALOG (DEPAN): Tarik foto sampul video otomatis dari Google + Ikon Play
+         return '<div class="relative w-full h-full"><img src="https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600" class="' + (extraClass || 'w-full h-full object-cover') + '" alt="Video Thumbnail"><div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors"><i class="ph-fill ph-play-circle text-white text-5xl drop-shadow-md opacity-90"></i></div></div>';
+      } else {
+         // 2. MODE POP-UP DETAIL: Tampilkan Player Full agar video tidak terpotong
+         return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full min-h-[40vh] sm:min-h-[45vh] rounded-xl bg-black shadow-sm" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
       }
-      // Jika dari server luar, gunakan tag video normal
-      return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" autoplay loop muted playsinline controls></video>';
+      
     }
-    
-    // Standar render Gambar
-    return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">';
+    // Jika video berasal dari server selain Google Drive
+    return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" autoplay loop muted playsinline controls></video>'; 
+  } 
+  
+  // Jika formatnya berupa gambar/foto biasa
+  return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">'; 
+};
   }
 
   window.addEventListener('DOMContentLoaded', function() { var saved = sessionStorage.getItem('takobunny_user'); if (saved) { try { currentUser = JSON.parse(saved); } catch(e){} } fetchData(); });
