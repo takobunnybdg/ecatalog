@@ -389,7 +389,7 @@
   // =====================================================================
   // ADAPTER GOOGLE SCRIPT RUN UNTUK HOSTING EKSTERNAL
   // =====================================================================
-  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyph0yzwh2A6Ltcy733dcuNaofg4Tc2-I5Ke4RWpeLiVIitRqdvAhf7is2ePa9ksyiuyQ/exec";
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsg4xZGQE6HIOQakgrZPsc9Eu6qJdpJf92qMx47M1F6x9ScGcWZug6w5HxL2ODrKF4YQ/exec"; // Wajib diisi URL dari Google Apps Script (Deploy)
 
   if (typeof google === 'undefined') {
     var google = {
@@ -431,48 +431,42 @@
   }
   // =====================================================================
 
-  // --- PERBAIKAN: FUNGSI UPLOAD BANYAK FILE (MULTIPLE) ---
- function handleFileUpload(fileInputId, urlInputId, buttonId) {
-  var fileInput = document.getElementById(fileInputId); if (!fileInput) return;
-  var files = fileInput.files; if (!files || files.length === 0) return;
-  var btn = document.getElementById(buttonId); var originalText = btn.innerHTML;
-  btn.innerHTML = '<i class="ph-duotone ph-spinner-gap animate-spin"></i>'; btn.disabled = true;
-  var uploadedUrls = []; var currentIndex = 0;
-  
-  function uploadNext() {
-    if (currentIndex >= files.length) {
-      btn.innerHTML = originalText; btn.disabled = false; fileInput.value = "";
-      var urlField = document.getElementById(urlInputId);
-      if (urlField) {
-        var existingUrl = urlField.value.trim(); var newUrls = uploadedUrls.join(',');
-        urlField.value = existingUrl ? (existingUrl.endsWith(',') ? existingUrl + newUrls : existingUrl + ',' + newUrls) : newUrls;
-      }
-      return;
-    }
-    var file = files[currentIndex];
+  var ADMIN_WA_NUMBER = "6287715306568";
+  var stateKatalog = []; var stateGaleri = []; var stateProduk = []; var stateAdopsi = []; var stateTestimoni = [];
+  var currentUser = null; var pendingAdopsiTarget = null; var currentFilter = 'All'; var currentSort = 'default';
+
+  // --- PERBAIKAN: FUNGSI UPLOAD BANYAK FILE & BATAS 25MB ---
+  function handleFileUpload(fileInputId, urlInputId, buttonId) {
+    var fileInput = document.getElementById(fileInputId); if (!fileInput) return;
+    var files = fileInput.files; if (!files || files.length === 0) return;
+    var btn = document.getElementById(buttonId); var originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="ph-duotone ph-spinner-gap animate-spin"></i>'; btn.disabled = true;
+    var uploadedUrls = []; var currentIndex = 0;
     
-    // PERBAIKAN VIDEO: Tingkatkan batas ukuran menjadi 25MB
-    if (file.size > 30 * 1024 * 1024) { 
-      alert("File " + file.name + " melebihi batas 30MB dan dilewati."); 
-      currentIndex++; 
-      uploadNext(); 
-      return; 
-    }
-    
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      if (typeof google !== 'undefined') {
-        google.script.run.withSuccessHandler(function(res) {
-          if (res && res.success) uploadedUrls.push(res.url); else alert("Gagal upload: " + (res ? res.message : ""));
-          currentIndex++; uploadNext();
-        }).withFailureHandler(function(err) { 
-          alert("Gagal jaringan saat upload file."); currentIndex++; uploadNext(); 
-        }).apiUploadFile(e.target.result, file.name);
+    function uploadNext() {
+      if (currentIndex >= files.length) {
+        btn.innerHTML = originalText; btn.disabled = false; fileInput.value = "";
+        var urlField = document.getElementById(urlInputId);
+        if (urlField) {
+          var existingUrl = urlField.value.trim(); var newUrls = uploadedUrls.join(',');
+          urlField.value = existingUrl ? (existingUrl.endsWith(',') ? existingUrl + newUrls : existingUrl + ',' + newUrls) : newUrls;
+        }
+        return;
       }
-    }; reader.readAsDataURL(file);
+      var file = files[currentIndex];
+      if (file.size > 25 * 1024 * 1024) { alert("File " + file.name + " melebihi batas 25MB dan dilewati."); currentIndex++; uploadNext(); return; }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        if (typeof google !== 'undefined') {
+          google.script.run.withSuccessHandler(function(res) {
+            if (res && res.success) uploadedUrls.push(res.url); else alert("Gagal upload: " + (res ? res.message : ""));
+            currentIndex++; uploadNext();
+          }).withFailureHandler(function(err) { alert("Gagal jaringan saat upload file."); currentIndex++; uploadNext(); }).apiUploadFile(e.target.result, file.name);
+        }
+      }; reader.readAsDataURL(file);
+    }
+    uploadNext();
   }
-  uploadNext();
-}
 
   // --- PERBAIKAN: FUNGSI NAVIGASI GESER SLIDER ---
   function slideKatalog(direction) {
@@ -487,53 +481,52 @@
   function submitFormResi() { var idTrans = document.getElementById('resi-id-trans').value; var url = document.getElementById('resi-url-input').value; google.script.run.withSuccessHandler(function() { fetchData(); }).apiUpdateStatusPengiriman(idTrans, "Sudah Dikirim", url); document.getElementById('modal-form-resi').classList.add('hidden'); tempSelectKirim = null; }
   function changeStatusLunasManual(selectEl, idTrans) { var status = selectEl.value; if (confirm("Ubah status pembayaran menjadi '" + status + "'?\n\n(Status Katalog Kelinci akan otomatis menyesuaikan konfirmasi ini)")) { google.script.run.withSuccessHandler(function(){ fetchData(); }).apiUpdateStatusPelunasanManual(idTrans, status); } else { fetchData(); } }
   function saveOngkirAdmin(idTrans, btnEl) { var val = document.getElementById('ongkir-input-' + idTrans).value; var ori = btnEl.innerHTML; btnEl.innerHTML = '<i class="ph-duotone ph-spinner-gap animate-spin"></i>'; btnEl.disabled = true; google.script.run.withSuccessHandler(function(res){ btnEl.innerHTML = ori; btnEl.disabled = false; fetchData(); }).apiUpdateOngkir(idTrans, val); }
-  function fixImageUrl(url) { if (!url) return ''; var cleanUrl = String(url).trim(); if (cleanUrl.indexOf('src=') !== -1) { var match = cleanUrl.match(/src=["']([^"']+)["']/); if (match && match[1]) cleanUrl = match[1]; } if ((cleanUrl.indexOf('ibb.co/') !== -1 || cleanUrl.indexOf('ibb.co.com/') !== -1) && cleanUrl.indexOf('i.ibb.co/') === -1) { var parts = cleanUrl.split('/'); var idImg = parts[parts.length - 1] || parts[parts.length - 2]; if (idImg && idImg.indexOf('.') === -1) return 'https://i.ibb.co/' + idImg + '/image.png'; } if (cleanUrl.indexOf('drive.google.com') !== -1) { var idMatch = cleanUrl.match(/[\w-]{25,}/); if (idMatch && idMatch[0]) return 'https://lh3.googleusercontent.com/d/' + idMatch[0]; } return cleanUrl; }
+  
+  function fixImageUrl(url) { 
+    if (!url) return ''; 
+    var cleanUrl = String(url).trim(); 
+    if (cleanUrl.indexOf('src=') !== -1) { var match = cleanUrl.match(/src=["']([^"']+)["']/); if (match && match[1]) cleanUrl = match[1]; } 
+    if ((cleanUrl.indexOf('ibb.co/') !== -1 || cleanUrl.indexOf('ibb.co.com/') !== -1) && cleanUrl.indexOf('i.ibb.co/') === -1) { var parts = cleanUrl.split('/'); var idImg = parts[parts.length - 1] || parts[parts.length - 2]; if (idImg && idImg.indexOf('.') === -1) return 'https://i.ibb.co/' + idImg + '/image.png'; } 
+    if (cleanUrl.indexOf('drive.google.com') !== -1) { var idMatch = cleanUrl.match(/[\w-]{25,}/); if (idMatch && idMatch[0]) return 'https://lh3.googleusercontent.com/d/' + idMatch[0]; } 
+    return cleanUrl; 
+  }
+
+  // --- PERBAIKAN: MEDIA HTML & VIDEO ---
+  function createMediaHtml(url, altText, extraClass) { 
+    var cleanUrl = fixImageUrl(url); 
+    if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>'; 
+    
+    var lower = cleanUrl.toLowerCase(); 
+    var isThumbnail = (extraClass && extraClass.indexOf('group-hover') !== -1);
+    
+    if (lower.indexOf('tiktok.com') !== -1) { 
+      var m = cleanUrl.match(/\/video\/(\d+)/); 
+      if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>'; 
+    } 
+    if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) { 
+      var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0]; 
+      return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>'; 
+    } 
+    if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) { 
+      var idMatch = cleanUrl.match(/[\w-]{25,}/); 
+      if ((lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) && idMatch && idMatch[0]) {
+        if (isThumbnail) {
+           return '<div class="relative w-full h-full"><img src="https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600" class="' + (extraClass || 'w-full h-full object-cover') + '" alt="Video Thumbnail"><div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors"><i class="ph-fill ph-play-circle text-white text-5xl drop-shadow-md opacity-90"></i></div></div>';
+        } else {
+           return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full min-h-[40vh] sm:min-h-[45vh] rounded-xl bg-black shadow-sm" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
+        }
+      }
+      return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" autoplay loop muted playsinline controls></video>'; 
+    } 
+    return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">'; 
+  }
+  
   function getAgeInDays(dobStr) { if (!dobStr) return 999; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return 999; return Math.max(0, Math.floor((new Date().getTime() - dobDate.getTime()) / (1000 * 3600 * 24))); }
   function getEstimatedReadyDate(dobStr) { if (!dobStr) return 'Saat Usia 2 Bulan (60 Hari)'; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return 'Saat Usia 2 Bulan (60 Hari)'; var rDate = new Date(dobDate); rDate.setDate(rDate.getDate() + 60); var bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]; return rDate.getDate() + " " + bln[rDate.getMonth()] + " " + rDate.getFullYear(); }
   function calculateAgeOrDob(dobStr) { if (!dobStr) return '-'; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return dobStr; var today = new Date(); var birth = new Date(dobDate.getFullYear(), dobDate.getMonth(), dobDate.getDate()); if (birth > today) return "0 Hari"; var years = today.getFullYear() - birth.getFullYear(); var months = today.getMonth() - birth.getMonth(); var days = today.getDate() - birth.getDate(); if (days < 0) { months--; var prevMonth = new Date(today.getFullYear(), today.getMonth(), 0); days += prevMonth.getDate(); } if (months < 0) { years--; months += 12; } var parts = []; if (years > 0) parts.push(years + " Thn"); if (months > 0) parts.push(months + " Bln"); if (days > 0 || parts.length === 0) parts.push(days + " Hri"); return parts.join(" "); }
   function formatDisplayDate(dobStr) { if (!dobStr) return '-'; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return dobStr; var bln = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"]; return dobDate.getDate() + " " + bln[dobDate.getMonth()] + " " + dobDate.getFullYear(); }
   function formatTanggalIndo(tglStr) { if (!tglStr) return '-'; var c = String(tglStr).split(' ')[0].trim(); if (c.indexOf('/') !== -1) { var p = c.split('/'); if (p.length === 3) { var bln = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"]; var m = parseInt(p[1], 10); if (m >= 1 && m <= 12) return parseInt(p[0], 10) + ' ' + bln[m - 1] + ' ' + p[2]; } } return c; }
   function fixPhoneNumber(phone) { if (!phone) return ''; var str = String(phone).trim(); if (str.length > 0 && str.indexOf('0') !== 0 && str.indexOf('62') !== 0) str = '0' + str; return str; }
-function createMediaHtml(url, altText, extraClass) { 
-  var cleanUrl = fixImageUrl(url); 
-  if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>'; 
-  
-  var lower = cleanUrl.toLowerCase(); 
-  
-  // Trik Deteksi: Apakah ini di halaman depan (katalog) atau di dalam pop-up detail?
-  var isThumbnail = (extraClass && extraClass.indexOf('group-hover') !== -1);
-  
-  if (lower.indexOf('tiktok.com') !== -1) { 
-    var m = cleanUrl.match(/\/video\/(\d+)/); 
-    if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>'; 
-  } 
-  
-  if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) { 
-    var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0]; 
-    return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>'; 
-  } 
-  
-  if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) { 
-    var idMatch = cleanUrl.match(/[\w-]{25,}/); 
-    if ((lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) && idMatch && idMatch[0]) {
-      
-      if (isThumbnail) {
-         // 1. MODE KATALOG (DEPAN): Tarik foto sampul video otomatis dari Google + Ikon Play
-         return '<div class="relative w-full h-full"><img src="https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600" class="' + (extraClass || 'w-full h-full object-cover') + '" alt="Video Thumbnail"><div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors"><i class="ph-fill ph-play-circle text-white text-5xl drop-shadow-md opacity-90"></i></div></div>';
-      } else {
-         // 2. MODE POP-UP DETAIL: Tampilkan Player Full agar video tidak terpotong
-         return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full min-h-[40vh] sm:min-h-[45vh] rounded-xl bg-black shadow-sm" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
-      }
-      
-    }
-    // Jika video berasal dari server selain Google Drive
-    return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" autoplay loop muted playsinline controls></video>'; 
-  } 
-  
-  // Jika formatnya berupa gambar/foto biasa
-  return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">'; 
-};
-  }
 
   window.addEventListener('DOMContentLoaded', function() { var saved = sessionStorage.getItem('takobunny_user'); if (saved) { try { currentUser = JSON.parse(saved); } catch(e){} } fetchData(); });
   function updateNavUserUI() { var box = document.getElementById('nav-user-box'); if (!box) return; if (currentUser) { var userUsername = String(currentUser.username).trim().toLowerCase(); var userWa = fixPhoneNumber(currentUser.noHp); var count = stateAdopsi.filter(function(a) { return (a.username && String(a.username).trim().toLowerCase() === userUsername) || (userWa && fixPhoneNumber(a.waAdopter) === userWa); }).length; var badgeHtml = count > 0 ? '<span class="bg-gold text-white px-2 py-0.5 rounded-md text-[11px] font-black ml-1.5 shadow-sm">' + count + '</span>' : ''; box.innerHTML = '<button type="button" onclick="showSection(\'kelinciku\')" class="btn-elegant px-4 py-2 rounded-xl font-title text-xs sm:text-sm font-bold bg-rose text-earth shadow-sm hover:brightness-95 border border-rose-300"><i class="ph-duotone ph-shopping-bag text-lg"></i> Kelinciku' + badgeHtml + '</button><div class="flex items-center gap-2 text-sm font-bold text-earth bg-peach/50 px-3 py-2 rounded-xl border border-peachdark/30"><i class="ph-fill ph-user-circle text-xl text-gold"></i><span>' + (currentUser.nama || currentUser.username).split(' ')[0] + '</span><button type="button" onclick="userLogout()" class="text-gray-400 hover:text-red-500 ml-1 transition-colors"><i class="ph-bold ph-sign-out text-lg"></i></button></div>'; } else box.innerHTML = '<button type="button" onclick="openAuthModal()" id="btn-nav-auth" class="btn-elegant px-5 py-2.5 rounded-xl font-title text-xs sm:text-sm font-bold border-2 border-peachdark text-earth hover:bg-peach"><i class="ph-duotone ph-user-circle text-lg"></i> Masuk</button>'; }
