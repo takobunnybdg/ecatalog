@@ -263,7 +263,7 @@
       <div class="bg-white p-8 sm:p-12 rounded-[2.5rem] card-elegant">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 border-b border-gray-200 pb-6 mb-6">
           <div><h2 class="text-2xl sm:text-3xl font-bold text-earth font-title flex items-center gap-3"><i class="ph-duotone ph-shopping-bag text-4xl text-rose-400"></i> Kelinciku</h2><p class="text-sm text-earthlight mt-1">Riwayat pesanan dan status logistik Anda.</p></div>
-          <div class="bg-peach/50 px-5 py-3 rounded-2xl border border-peachdark/30 text-sm"><span class="text-earthlight">Akun Terhubung:</span><strong id="kelinciku-user-nama" class="text-earth font-title text-base block mt-0.5">Username</strong></div>
+          <div class="bg-peach/50 px-5 py-3 rounded-2xl border border-peachdark/30 text-sm flex justify-between items-center gap-4"><div><span class="text-earthlight">Akun Terhubung:</span><strong id="kelinciku-user-nama" class="text-earth font-title text-base block mt-0.5">Username</strong></div><button type="button" onclick="openChangePassModal()" class="bg-white px-3 py-2 rounded-xl text-xs font-bold text-earth border border-peachdark/50 shadow-sm hover:bg-peach transition flex items-center gap-1.5"><i class="ph-bold ph-key"></i> Ubah Password</button></div>
         </div>
         <div id="kelinciku-list-container" class="space-y-6"><div class="text-center py-16 text-earthlight font-semibold">Memuat data...</div></div>
       </div>
@@ -414,13 +414,40 @@
   <footer class="bg-earth text-bgmain py-10 mt-16 text-center text-sm">
     <div class="flex justify-center mb-4"><div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white/20 opacity-90 hover:opacity-100 transition"><img src="https://i.ibb.co.com/BKzYc91X/Whats-App-Image-2026-10-12-at-13-55-24-removebg-preview.png" class="w-full h-full object-cover"></div></div>
     <p class="font-title text-xl font-black mb-1">TAKO BUNNY</p><p class="opacity-70 font-semibold text-xs tracking-wider">Peternakan Kelinci Hias  • Bandung, ID • 087715306568</p>
+    <!-- MODAL UBAH PASSWORD -->
+  <div id="modal-change-pass" class="fixed inset-0 bg-earth/60 backdrop-blur-md z-[120] flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-floating relative">
+      <button type="button" onclick="closeChangePassModal()" class="absolute top-5 right-6 text-2xl text-earthlight hover:text-earth"><i class="ph-bold ph-x"></i></button>
+      <h3 class="text-xl font-bold text-earth mb-4 font-title">Ubah Password</h3>
+      <form onsubmit="submitChangePassword(event)" class="space-y-4 text-sm">
+        <input type="password" id="cp-old" required placeholder="Password Lama (Sesuai Email)" class="input-elegant">
+        <input type="password" id="cp-new" required placeholder="Password Baru" class="input-elegant">
+        <button type="submit" id="btn-submit-cp" class="w-full py-3 bg-earth text-white font-bold rounded-xl shadow-soft hover:bg-earth/90 flex justify-center items-center gap-2 transition"><i class="ph-bold ph-floppy-disk"></i> Simpan Password</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    function openChangePassModal() { document.getElementById('modal-change-pass').classList.remove('hidden'); document.getElementById('cp-old').value = ''; document.getElementById('cp-new').value = ''; }
+    function closeChangePassModal() { document.getElementById('modal-change-pass').classList.add('hidden'); }
+    function submitChangePassword(e) {
+      e.preventDefault();
+      var oldP = document.getElementById('cp-old').value; var newP = document.getElementById('cp-new').value;
+      if(!oldP || !newP) return;
+      var btn = document.getElementById('btn-submit-cp');
+      btn.disabled = true; btn.innerHTML = '<i class="ph-duotone ph-spinner-gap animate-spin"></i> Menyimpan...';
+      google.script.run.withSuccessHandler(function(res){
+        btn.disabled = false; btn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Simpan Password';
+        alert(res.message); if(res.success) closeChangePassModal();
+      }).apiChangePassword(currentUser.username, oldP, newP);
+    }
+  </script>
   </footer>
 
   <script>
   // =====================================================================
   // ADAPTER GOOGLE SCRIPT RUN UNTUK HOSTING EKSTERNAL
   // =====================================================================
-  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBzkd4tHrn4Ggunqb8CSDiP18I1kJSMtRfmAI0qHhsFVDf0cMi15m999G1BgFJPxAm-g/exec"; 
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNsgW_7sXrnQgm6ecnL0nMaJJxIDXJqJBs38D5jMQbCaqCTV3Pp5O-2Gs-LsYpvkaYsg/exec"; 
   // ⚠️ WAJIB: GANTI TEKS DI ATAS DENGAN LINK GOOGLE APPS SCRIPT ANDA! ⚠️
 
   if (typeof google === 'undefined') {
