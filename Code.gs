@@ -1,7 +1,21 @@
 // =========================================================================
 // BACKEND DATABASE & UPLOAD MEDIA - TAKO BUNNY
 // =========================================================================
+//
+// DAFTAR ISI
+//   0. Router (doGet / doPost)
+//   1. Upload file / media (foto & video)
+//   2. Pengambilan semua data (read)
+//   3. Administrasi & autentikasi user
+//   4. Katalog (tambah, ubah, hapus)
+//   5. Adopsi / transaksi
+//   6. Produk, galeri, dan testimoni
+//   7. Konfigurasi kwitansi & label logistik
+// =========================================================================
 
+// =========================================================================
+// 0. ROUTER
+// =========================================================================
 function doGet(e) {
   return ContentService.createTextOutput("Backend Tako Bunny Online.")
     .setMimeType(ContentService.MimeType.TEXT);
@@ -184,6 +198,23 @@ function apiLoginAdmin(payload) {
   return { success: false, message: "Username/Password Admin Salah" };
 }
 
+function apiLoginUser(payload) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return { success: false, message: "User tidak ditemukan." };
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toLowerCase() === String(payload.username).toLowerCase() && String(data[i][3]) === String(payload.password)) {
+      return {
+        success: true,
+        user: { username: data[i][0], nama: data[i][1], noHp: data[i][2], email: data[i][4] }
+      };
+    }
+  }
+  return { success: false, message: "Username atau Password salah." };
+}
+
 function apiRegisterUser(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("Users") || ss.insertSheet("Users");
@@ -203,23 +234,6 @@ function apiRegisterUser(payload) {
     success: true,
     user: { username: payload.username, nama: payload.nama, noHp: payload.noHp, email: payload.email }
   };
-}
-
-function apiLoginUser(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Users");
-  if (!sheet) return { success: false, message: "User tidak ditemukan." };
-  
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(payload.username).toLowerCase() && String(data[i][3]) === String(payload.password)) {
-      return {
-        success: true,
-        user: { username: data[i][0], nama: data[i][1], noHp: data[i][2], email: data[i][4] }
-      };
-    }
-  }
-  return { success: false, message: "Username atau Password salah." };
 }
 
 function apiForgotPassword(email) {
