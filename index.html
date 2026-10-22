@@ -389,7 +389,7 @@
   // =====================================================================
   // ADAPTER GOOGLE SCRIPT RUN UNTUK HOSTING EKSTERNAL
   // =====================================================================
-  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUth8TCuHnNf64Vf50LxuDJQat0Pgi9VgAAVUduhRODGSJ8H2-3jWcVXYyPvpR7JfjqA/exec";
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyph0yzwh2A6Ltcy733dcuNaofg4Tc2-I5Ke4RWpeLiVIitRqdvAhf7is2ePa9ksyiuyQ/exec";
 
   if (typeof google === 'undefined') {
     var google = {
@@ -432,37 +432,47 @@
   // =====================================================================
 
   // --- PERBAIKAN: FUNGSI UPLOAD BANYAK FILE (MULTIPLE) ---
-  function handleFileUpload(fileInputId, urlInputId, buttonId) {
-    var fileInput = document.getElementById(fileInputId); if (!fileInput) return;
-    var files = fileInput.files; if (!files || files.length === 0) return;
-    var btn = document.getElementById(buttonId); var originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="ph-duotone ph-spinner-gap animate-spin"></i>'; btn.disabled = true;
-    var uploadedUrls = []; var currentIndex = 0;
-    
-    function uploadNext() {
-      if (currentIndex >= files.length) {
-        btn.innerHTML = originalText; btn.disabled = false; fileInput.value = "";
-        var urlField = document.getElementById(urlInputId);
-        if (urlField) {
-          var existingUrl = urlField.value.trim(); var newUrls = uploadedUrls.join(',');
-          urlField.value = existingUrl ? (existingUrl.endsWith(',') ? existingUrl + newUrls : existingUrl + ',' + newUrls) : newUrls;
-        }
-        return;
+ function handleFileUpload(fileInputId, urlInputId, buttonId) {
+  var fileInput = document.getElementById(fileInputId); if (!fileInput) return;
+  var files = fileInput.files; if (!files || files.length === 0) return;
+  var btn = document.getElementById(buttonId); var originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="ph-duotone ph-spinner-gap animate-spin"></i>'; btn.disabled = true;
+  var uploadedUrls = []; var currentIndex = 0;
+  
+  function uploadNext() {
+    if (currentIndex >= files.length) {
+      btn.innerHTML = originalText; btn.disabled = false; fileInput.value = "";
+      var urlField = document.getElementById(urlInputId);
+      if (urlField) {
+        var existingUrl = urlField.value.trim(); var newUrls = uploadedUrls.join(',');
+        urlField.value = existingUrl ? (existingUrl.endsWith(',') ? existingUrl + newUrls : existingUrl + ',' + newUrls) : newUrls;
       }
-      var file = files[currentIndex];
-      if (file.size > 5 * 1024 * 1024) { alert("File " + file.name + " melebihi 5MB."); currentIndex++; uploadNext(); return; }
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        if (typeof google !== 'undefined') {
-          google.script.run.withSuccessHandler(function(res) {
-            if (res && res.success) uploadedUrls.push(res.url); else alert("Gagal upload: " + (res ? res.message : ""));
-            currentIndex++; uploadNext();
-          }).withFailureHandler(function(err) { alert("Gagal jaringan saat upload file."); currentIndex++; uploadNext(); }).apiUploadFile(e.target.result, file.name);
-        }
-      }; reader.readAsDataURL(file);
+      return;
     }
-    uploadNext();
+    var file = files[currentIndex];
+    
+    // PERBAIKAN VIDEO: Tingkatkan batas ukuran menjadi 25MB
+    if (file.size > 30 * 1024 * 1024) { 
+      alert("File " + file.name + " melebihi batas 30MB dan dilewati."); 
+      currentIndex++; 
+      uploadNext(); 
+      return; 
+    }
+    
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      if (typeof google !== 'undefined') {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res && res.success) uploadedUrls.push(res.url); else alert("Gagal upload: " + (res ? res.message : ""));
+          currentIndex++; uploadNext();
+        }).withFailureHandler(function(err) { 
+          alert("Gagal jaringan saat upload file."); currentIndex++; uploadNext(); 
+        }).apiUploadFile(e.target.result, file.name);
+      }
+    }; reader.readAsDataURL(file);
   }
+  uploadNext();
+}
 
   // --- PERBAIKAN: FUNGSI NAVIGASI GESER SLIDER ---
   function slideKatalog(direction) {
