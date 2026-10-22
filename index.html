@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TAKO BUNNY - Kelinci Hias Bandung</title>
-  <link rel="icon" type="image/png" href="i.ibb.co.com/KcXbwnkX/3-removebg-preview.png">
+  <link rel="icon" type="image/png" href="https://i.ibb.co.com/KcXbwnkX/3-removebg-preview.png">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Tipografi -->
@@ -18,7 +18,7 @@
         extend: {
           colors: {
             earth: '#4A3B32', earthlight: '#8B7A72', gold: '#D9A05B', peach: '#FDF1E7',
-            mint: '#EBF4EC', mintdark: '#A6C8AE', rose: '#F4D6D2', bgmain: '#FFFCF8'
+            mint: '#EBF4EC', mintdark: '#16A34A', rose: '#F4D6D2', bgmain: '#FFFCF8'
           },
           fontFamily: { title: ['Quicksand', 'sans-serif'], body: ['Nunito', 'sans-serif'] },
           boxShadow: { 'soft': '0 8px 30px rgba(74, 59, 50, 0.05)', 'floating': '0 15px 40px rgba(74, 59, 50, 0.08)' }
@@ -172,8 +172,6 @@
     @media print { @page { margin: 10mm; } body * { visibility: hidden; } .print-area, .print-area * { visibility: visible; } .print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; box-shadow: none !important; border: none !important; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; } }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -283,14 +281,50 @@
     </div>
   </div>
 
-  <div id="modal-detail-katalog" class="fixed inset-0 bg-earth/70 backdrop-blur-md z-[50] flex items-center justify-center p-4 hidden overflow-y-auto">
-    <div class="bg-white rounded-[2rem] overflow-hidden max-w-3xl w-full shadow-floating relative max-h-[92vh] flex flex-col justify-between my-auto border border-peachdark/20"><button type="button" onclick="closeDetailModal()" class="absolute top-5 right-5 z-20 bg-white/70 backdrop-blur text-earth w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:scale-105 transition"><i class="ph-bold ph-x text-xl"></i></button>
-      <div class="relative bg-peach/20 flex items-center justify-center overflow-hidden max-h-[50vh]"><div id="detail-media-box" class="w-full h-full flex items-center justify-center"></div></div>
-      <div class="p-8 sm:p-10 space-y-6 overflow-y-auto bg-white">
-        <div class="flex flex-col sm:flex-row justify-between items-start gap-5"><div><div class="flex items-center gap-2 mb-2"><span id="detail-ras" class="text-xs font-bold text-earthlight uppercase tracking-widest bg-gray-100 px-2.5 py-1 rounded-md">RAS</span><span id="detail-status" class="text-xs font-bold px-2.5 py-1 rounded-md bg-mint text-mintdark">Tersedia</span></div><h3 id="detail-nama" class="text-3xl sm:text-4xl font-black text-earth font-title tracking-tight">Nama Kelinci</h3><p id="detail-id" class="text-xs text-earthlight font-bold mt-1 font-mono">ID: RAB-0000</p></div><div class="text-left sm:text-right w-full sm:w-auto"><div id="detail-harga-container"></div></div></div>
-        <div class="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100 text-sm"><div class="bg-[#FAFAF9] p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center"><span class="text-earthlight text-[11px] font-bold uppercase tracking-wider mb-1">Gender</span><strong id="detail-gender" class="text-base text-earth font-title flex items-center gap-1.5">Jantan</strong></div><div class="bg-[#FAFAF9] p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center"><span class="text-earthlight text-[11px] font-bold uppercase tracking-wider mb-1">Warna</span><strong id="detail-warna" class="text-base text-earth font-title">Warna</strong></div><div class="bg-[#FAFAF9] p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center"><span class="text-earthlight text-[11px] font-bold uppercase tracking-wider mb-1">Usia / DOB</span><strong id="detail-dob" class="text-sm text-earth font-title leading-tight text-center">-</strong></div></div>
-        <div id="detail-action-btn" class="pt-4"></div>
+  <!-- POP-UP DETAIL KATALOG (BARU - RASIO 3:1 COMPACT) -->
+  <div id="modal-detail-katalog" class="fixed inset-0 bg-earth/90 backdrop-blur-md z-[50] flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-[2rem] overflow-hidden max-w-lg w-full shadow-floating relative h-[92vh] sm:h-[90vh] flex flex-col my-auto border border-gray-800">
+      
+      <!-- Tombol Close (Tumpang tindih di atas video/foto) -->
+      <button type="button" onclick="closeDetailModal()" class="absolute top-4 right-4 z-30 bg-black/40 backdrop-blur-md text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/70 transition"><i class="ph-bold ph-x text-lg"></i></button>
+      
+      <!-- MEDIA SECTION (Flex-Grow, Mengambil 75% tinggi layar) -->
+      <div class="relative bg-black flex-grow flex items-center justify-center overflow-hidden w-full">
+        <div id="detail-media-box" class="w-full h-full flex items-center justify-center"></div>
       </div>
+      
+      <!-- INFO SECTION (Flex-Shrink, Sangat Padat Tanpa Scroll) -->
+      <div class="p-5 space-y-3 bg-white flex-shrink-0">
+        <div class="flex justify-between items-center gap-2">
+          <div>
+            <div class="flex items-center gap-1.5 mb-1">
+              <span id="detail-ras" class="text-[10px] font-bold text-earthlight uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded">RAS</span>
+              <span id="detail-status" class="text-[10px] font-bold px-2 py-0.5 rounded bg-mint text-mintdark">Tersedia</span>
+              <span id="detail-id" class="text-[10px] text-gray-400 font-bold font-mono ml-1">ID: -</span>
+            </div>
+            <h3 id="detail-nama" class="text-2xl font-black text-earth font-title tracking-tight leading-none">Nama Kelinci</h3>
+          </div>
+          <div class="text-right flex-shrink-0"><div id="detail-harga-container"></div></div>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-2 border-t border-gray-100 pt-3">
+          <div class="bg-[#FAFAF9] py-2 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">
+            <span class="text-gray-400 text-[9px] font-bold uppercase tracking-wider mb-0.5">Gender</span>
+            <strong id="detail-gender" class="text-xs text-earth font-title flex items-center gap-1">Jantan</strong>
+          </div>
+          <div class="bg-[#FAFAF9] py-2 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">
+            <span class="text-gray-400 text-[9px] font-bold uppercase tracking-wider mb-0.5">Warna</span>
+            <strong id="detail-warna" class="text-xs text-earth font-title truncate px-1 w-full">Warna</strong>
+          </div>
+          <div class="bg-[#FAFAF9] py-2 px-1 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">
+            <span class="text-gray-400 text-[9px] font-bold uppercase tracking-wider mb-0.5">Usia / DOB</span>
+            <strong id="detail-dob" class="text-[10px] text-earth font-title leading-tight">-</strong>
+          </div>
+        </div>
+        
+        <div id="detail-action-btn" class="pt-1"></div>
+      </div>
+
     </div>
   </div>
 
@@ -383,13 +417,11 @@
   </footer>
 
   <script>
-  var ADMIN_WA_NUMBER = "6287715306568";
-  var stateKatalog = []; var stateGaleri = []; var stateProduk = []; var stateAdopsi = []; var stateTestimoni = [];
-  var currentUser = null; var pendingAdopsiTarget = null; var currentFilter = 'All'; var currentSort = 'default';
   // =====================================================================
   // ADAPTER GOOGLE SCRIPT RUN UNTUK HOSTING EKSTERNAL
   // =====================================================================
-  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDXr0-fD7h1MBNr3GwRa01x4oU101COwBNmnZ3PgGGjgw3nLhi8ug9VvKoHU6N6E0s5w/exec"; // Wajib diisi URL dari Google Apps Script (Deploy)
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBzkd4tHrn4Ggunqb8CSDiP18I1kJSMtRfmAI0qHhsFVDf0cMi15m999G1BgFJPxAm-g/exec"; 
+  // ⚠️ WAJIB: GANTI TEKS DI ATAS DENGAN LINK GOOGLE APPS SCRIPT ANDA! ⚠️
 
   if (typeof google === 'undefined') {
     var google = {
@@ -435,7 +467,6 @@
   var stateKatalog = []; var stateGaleri = []; var stateProduk = []; var stateAdopsi = []; var stateTestimoni = [];
   var currentUser = null; var pendingAdopsiTarget = null; var currentFilter = 'All'; var currentSort = 'default';
 
-  // --- PERBAIKAN: FUNGSI UPLOAD BANYAK FILE & BATAS 25MB ---
   function handleFileUpload(fileInputId, urlInputId, buttonId) {
     var fileInput = document.getElementById(fileInputId); if (!fileInput) return;
     var files = fileInput.files; if (!files || files.length === 0) return;
@@ -468,13 +499,11 @@
     uploadNext();
   }
 
-  // --- PERBAIKAN: FUNGSI NAVIGASI GESER SLIDER ---
   function slideKatalog(direction) {
     var slider = document.getElementById('slider-katalog-detail');
     if(slider) slider.scrollBy({ left: direction * slider.clientWidth, behavior: 'smooth' });
   }
 
-  // --- FUNGSI BAWAAN WEB ---
   var tempSelectKirim = null;
   function changeStatusKirimAdmin(selectEl, idTrans, currentResi) { var status = selectEl.value; if (status === "Sudah Dikirim") { tempSelectKirim = selectEl; document.getElementById('resi-id-trans').value = idTrans; document.getElementById('resi-url-input').value = currentResi || ''; document.getElementById('modal-form-resi').classList.remove('hidden'); } else google.script.run.withSuccessHandler(function() { fetchData(); }).apiUpdateStatusPengiriman(idTrans, status, currentResi); }
   function closeFormResi() { document.getElementById('modal-form-resi').classList.add('hidden'); if (tempSelectKirim) { fetchData(); tempSelectKirim = null; } }
@@ -491,7 +520,6 @@
     return cleanUrl; 
   }
 
-  // --- PERBAIKAN: MEDIA HTML & VIDEO ---
   function createMediaHtml(url, altText, extraClass) { 
     var cleanUrl = fixImageUrl(url); 
     if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>'; 
@@ -511,9 +539,9 @@
       var idMatch = cleanUrl.match(/[\w-]{25,}/); 
       if ((lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) && idMatch && idMatch[0]) {
         if (isThumbnail) {
-           return '<div class="relative w-full h-full"><img src="https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600" class="' + (extraClass || 'w-full h-full object-cover') + '" alt="Video Thumbnail"><div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors"><i class="ph-fill ph-play-circle text-white text-5xl drop-shadow-md opacity-90"></i></div></div>';
+           return '<div class="relative w-full h-full"><img src="https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600" class="' + (extraClass || 'w-full h-full object-cover') + '" alt="Video Thumbnail" onerror="this.src=\'https://via.placeholder.com/300?text=Video+Kelinci\'"><div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors"><i class="ph-fill ph-play-circle text-white text-5xl drop-shadow-md opacity-90"></i></div></div>';
         } else {
-           return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full min-h-[40vh] sm:min-h-[45vh] rounded-xl bg-black shadow-sm" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
+           return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
         }
       }
       return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" autoplay loop muted playsinline controls></video>'; 
@@ -619,37 +647,61 @@
     container.innerHTML = html;
   }
 
-  // --- PERBAIKAN: POPUP DETAIL MULTI FOTO & SLIDER ---
   function openDetailModal(id) {
     var item = stateKatalog.find(function(k) { return String(k.id).trim() === String(id).trim(); }); if (!item) return;
-    document.getElementById('detail-id').innerText = 'ID: ' + item.id; document.getElementById('detail-nama').innerText = item.nama; document.getElementById('detail-ras').innerText = item.ras;
-    var isBookingMode = (item.status || '').toLowerCase() === 'tersedia' && (getAgeInDays(item.dob) >= 0 && getAgeInDays(item.dob) < 50); var hargaHtml = '';
-    if (item.hargaCoret > item.harga) { var disc = Math.round(((item.hargaCoret - item.harga) / item.hargaCoret) * 100); hargaHtml += '<span class="text-sm text-red-400 line-through block font-bold mb-1">Rp ' + Number(item.hargaCoret).toLocaleString('id-ID') + '</span><div class="font-title text-3xl font-black text-earth flex items-center gap-3">Rp ' + Number(item.harga).toLocaleString('id-ID') + ' <span class="text-xs bg-red-100 text-red-600 font-bold px-2 py-1 rounded-md border border-red-200">-' + disc + '%</span></div>'; } else { hargaHtml += '<div class="font-title text-3xl font-black text-earth">Rp ' + Number(item.harga).toLocaleString('id-ID') + '</div>'; }
-    if (isBookingMode) hargaHtml += '<div class="text-xs font-bold text-orange-800 mt-2.5 bg-orange-50 p-2.5 rounded-xl border border-orange-100 flex items-start gap-2 shadow-sm"><i class="ph-fill ph-star text-orange-400 mt-0.5 text-lg"></i> <span>Dapat di-keep dengan <strong>DP 50% (Rp ' + (item.harga * 0.5).toLocaleString('id-ID') + ')</strong></span></div>';
+    document.getElementById('detail-id').innerText = 'ID: ' + item.id;
+    document.getElementById('detail-nama').innerText = item.nama;
+    document.getElementById('detail-ras').innerText = item.ras;
+    
+    var isBookingMode = (item.status || '').toLowerCase() === 'tersedia' && (getAgeInDays(item.dob) >= 0 && getAgeInDays(item.dob) < 50); 
+    var hargaHtml = '';
+    if (item.hargaCoret > item.harga) { 
+        var disc = Math.round(((item.hargaCoret - item.harga) / item.hargaCoret) * 100); 
+        hargaHtml += '<span class="text-[10px] text-red-400 line-through block font-bold mb-0.5">Rp ' + Number(item.hargaCoret).toLocaleString('id-ID') + '</span><div class="font-title text-xl font-black text-earth flex justify-end items-center gap-1.5">Rp ' + Number(item.harga).toLocaleString('id-ID') + ' <span class="text-[9px] bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded border border-red-200">-' + disc + '%</span></div>'; 
+    } else { 
+        hargaHtml += '<div class="font-title text-xl font-black text-earth">Rp ' + Number(item.harga).toLocaleString('id-ID') + '</div>'; 
+    }
+    if (isBookingMode) hargaHtml += '<div class="text-[9px] font-bold text-orange-800 mt-1 flex justify-end items-center gap-1"><i class="ph-fill ph-star text-orange-400"></i> DP 50%</div>';
+    
     document.getElementById('detail-harga-container').innerHTML = hargaHtml;
+    
     var genderIcon = item.gender.toLowerCase() === 'jantan' ? '<i class="ph-bold ph-gender-male text-blue-500"></i>' : '<i class="ph-bold ph-gender-female text-pink-500"></i>';
-    document.getElementById('detail-gender').innerHTML = genderIcon + ' ' + item.gender; document.getElementById('detail-warna').innerText = item.warna || '-'; document.getElementById('detail-dob').innerHTML = formatDisplayDate(item.dob) + '<br><span class="text-[11px] text-earthlight font-semibold mt-0.5 block">(' + calculateAgeOrDob(item.dob) + ')</span>';
-    var isAvail = (item.status || '').toLowerCase() === 'tersedia'; var statusEl = document.getElementById('detail-status');
-    if (isAvail) { statusEl.innerHTML = isBookingMode ? '<i class="ph-fill ph-star"></i> Siap Booking' : '<i class="ph-fill ph-check-circle"></i> Tersedia'; statusEl.className = isBookingMode ? "text-xs font-bold px-2.5 py-1 rounded-md bg-orange-100 text-orange-800 flex items-center gap-1.5" : "text-xs font-bold px-2.5 py-1 rounded-md bg-mint text-mintdark flex items-center gap-1.5"; } else { statusEl.innerHTML = '<i class="ph-fill ph-lock-key"></i> ' + item.status; statusEl.className = "text-xs font-bold px-2.5 py-1 rounded-md bg-gray-200 text-gray-600 flex items-center gap-1.5"; }
+    document.getElementById('detail-gender').innerHTML = genderIcon + ' ' + item.gender; 
+    document.getElementById('detail-warna').innerText = item.warna || '-'; 
+    document.getElementById('detail-dob').innerHTML = calculateAgeOrDob(item.dob) !== '-' ? calculateAgeOrDob(item.dob) : '-';
+    
+    var isAvail = (item.status || '').toLowerCase() === 'tersedia'; 
+    var statusEl = document.getElementById('detail-status');
+    if (isAvail) { 
+        statusEl.innerHTML = isBookingMode ? '<i class="ph-fill ph-star"></i> Siap Booking' : '<i class="ph-fill ph-check-circle"></i> Tersedia'; 
+        statusEl.className = isBookingMode ? "text-[10px] font-bold px-2.5 py-1 rounded bg-orange-500 text-white flex items-center gap-1 shadow-sm" : "text-[10px] font-bold px-2.5 py-1 rounded bg-emerald-600 text-white flex items-center gap-1 shadow-sm"; 
+    } else { 
+        statusEl.innerHTML = '<i class="ph-fill ph-lock-key"></i> ' + item.status; 
+        statusEl.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-600 flex items-center gap-1"; 
+    }
 
     var urls = (item.fotourl || '').split(',').map(function(u) { return u.trim(); }).filter(function(u) { return u !== ''; });
     var mediaHtml = '';
     if (urls.length <= 1) {
-      mediaHtml = createMediaHtml(urls[0] || '', item.nama, 'max-h-[45vh] w-auto max-w-full object-contain mx-auto');
+      mediaHtml = createMediaHtml(urls[0] || '', item.nama, 'w-full h-full object-contain mx-auto');
     } else {
-      mediaHtml = '<div class="relative w-full h-full flex items-center">';
-      mediaHtml += '<div id="slider-katalog-detail" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar w-full h-full items-center gap-4 px-4 py-2">';
-      for (var m = 0; m < urls.length; m++) { mediaHtml += '<div class="snap-center shrink-0 w-full h-full flex items-center justify-center">' + createMediaHtml(urls[m], item.nama, 'max-h-[45vh] w-auto max-w-full object-contain rounded-xl shadow-sm') + '</div>'; }
+      mediaHtml = '<div class="relative w-full h-full flex items-center bg-black">';
+      mediaHtml += '<div id="slider-katalog-detail" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar w-full h-full items-center gap-0">';
+      for (var m = 0; m < urls.length; m++) { 
+          mediaHtml += '<div class="snap-center shrink-0 w-full h-full flex items-center justify-center">' + createMediaHtml(urls[m], item.nama, 'w-full h-full object-contain') + '</div>'; 
+      }
       mediaHtml += '</div>';
-      mediaHtml += '<button type="button" onclick="slideKatalog(-1)" class="absolute left-3 z-20 bg-white/90 text-earth w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-white hover:scale-110 transition-all border border-gray-100"><i class="ph-bold ph-caret-left text-xl"></i></button>';
-      mediaHtml += '<button type="button" onclick="slideKatalog(1)" class="absolute right-3 z-20 bg-white/90 text-earth w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-white hover:scale-110 transition-all border border-gray-100"><i class="ph-bold ph-caret-right text-xl"></i></button>';
+      mediaHtml += '<button type="button" onclick="slideKatalog(-1)" class="absolute left-3 z-20 bg-white/50 text-black w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-white backdrop-blur transition-all border border-transparent"><i class="ph-bold ph-caret-left text-lg"></i></button>';
+      mediaHtml += '<button type="button" onclick="slideKatalog(1)" class="absolute right-3 z-20 bg-white/50 text-black w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-white backdrop-blur transition-all border border-transparent"><i class="ph-bold ph-caret-right text-lg"></i></button>';
       mediaHtml += '<div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md shadow-sm z-10 tracking-widest"><i class="ph-fill ph-images align-middle mr-1"></i> ' + urls.length + ' FOTO</div></div>';
     }
     var box = document.getElementById('detail-media-box');
-    box.innerHTML = mediaHtml; box.className = 'w-full h-full flex items-center justify-center relative bg-peach/20';
+    box.innerHTML = mediaHtml; 
 
     var actionBtnContainer = document.getElementById('detail-action-btn');
-    if (isAvail) actionBtnContainer.innerHTML = '<button type="button" onclick="openAdopsiModal(\'' + item.id + '\', \'' + item.nama + '\', \'' + item.ras + '\', \'' + item.gender + '\', \'' + item.harga + '\', \'' + (item.dob || '') + '\')" class="w-full py-4 ' + (isBookingMode ? 'bg-gold' : 'bg-earth') + ' text-white font-title font-bold text-base rounded-2xl shadow-soft hover:brightness-95 transition flex justify-center items-center gap-2">' + (isBookingMode ? '<i class="ph-bold ph-bookmark-simple text-xl"></i> Booking Sekarang (DP 50%)' : '<i class="ph-bold ph-paw-print text-xl"></i> Adopsi Sekarang') + '</button>'; else actionBtnContainer.innerHTML = '<button disabled class="w-full py-4 bg-[#FAFAF9] text-gray-400 font-title font-bold text-base border border-gray-100 rounded-2xl cursor-not-allowed flex justify-center items-center gap-2"><i class="ph-bold ph-lock-key text-xl"></i> Status ' + item.status + '</button>';
+    if (isAvail) actionBtnContainer.innerHTML = '<button type="button" onclick="openAdopsiModal(\'' + item.id + '\', \'' + item.nama + '\', \'' + item.ras + '\', \'' + item.gender + '\', \'' + item.harga + '\', \'' + (item.dob || '') + '\')" class="w-full py-3 ' + (isBookingMode ? 'bg-gold' : 'bg-earth') + ' text-white font-title font-bold text-sm rounded-xl shadow-soft hover:brightness-95 transition flex justify-center items-center gap-2">' + (isBookingMode ? '<i class="ph-bold ph-bookmark-simple text-lg"></i> Booking (DP 50%)' : '<i class="ph-bold ph-paw-print text-lg"></i> Adopsi Sekarang') + '</button>'; 
+    else actionBtnContainer.innerHTML = '<button disabled class="w-full py-3 bg-[#FAFAF9] text-gray-400 font-title font-bold text-sm border border-gray-100 rounded-xl cursor-not-allowed flex justify-center items-center gap-2"><i class="ph-bold ph-lock-key text-lg"></i> Status ' + item.status + '</button>';
+    
     document.getElementById('modal-detail-katalog').classList.remove('hidden');
   }
 
