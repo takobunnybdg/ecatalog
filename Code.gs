@@ -16,6 +16,12 @@ function apiUploadFile(dataUrl, filename) {
     var blob = Utilities.newBlob(Utilities.base64Decode(base64Str), mimeType, filename);
     var file = folder.createFile(blob);
     var directUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
+    
+    // PERBAIKAN VIDEO: Tambahkan tag ekstensi agar website tahu ini adalah pemutar video
+    if (mimeType.toLowerCase().indexOf('video') !== -1) {
+      directUrl += "#.mp4";
+    }
+    
     return { success: true, url: directUrl, message: "Upload berhasil!" };
   } catch (e) { return { success: false, message: "Error upload: " + e.toString() }; }
 }
