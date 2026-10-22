@@ -6,6 +6,18 @@ function doGet() {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+function getSheetByName_(sheetName) {
+  var props = PropertiesService.getScriptProperties();
+  var ssId = props.getProperty('SPREADSHEET_ID');
+  
+  if (ssId) {
+    return SpreadsheetApp.openById(ssId).getSheetByName(sheetName);
+  } else {
+    // Jika script terikat langsung dengan Spreadsheet
+    return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  }
+}
+
 function apiUploadFile(dataUrl, filename) {
   try {
     var folderId = "1VJb5Iy_fdD9U4DiQoKqTDgApTlI0eKpW";
@@ -175,35 +187,150 @@ function apiUpdateStatusPelunasanManual(idTrans, statusBaru) {
   return { success: false, message: "Transaksi tidak ditemukan!" };
 }
 
-function apiRegisterUser(payload) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Users");
-  if (!sheet) { sheet = ss.insertSheet("Users"); sheet.appendRow(["Username", "Nama Lengkap", "No HP", "Password", "Tanggal Daftar", "Email"]); }
-  var data = sheet.getDataRange().getValues(); var userClean = String(payload.username).trim().toLowerCase(); var emailClean = payload.email ? String(payload.email).trim().toLowerCase() : "";
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim().toLowerCase() === userClean) return { success: false, message: "Username sudah terdaftar!" }; }
-  var tglStr = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm"); sheet.appendRow([userClean, payload.nama, payload.noHp, payload.password, tglStr, emailClean]);
-  return { success: true, message: "Pendaftaran berhasil!", user: { username: userClean, nama: payload.nama, noHp: payload.noHp, email: emailClean } };
+function apiRegisterUser(data) {
+  try {
+    var sheet = getSheetByName_("Users"); // Pastikan nama sheet Anda "Users"
+    var rows = sheet.getDataRange().getValues();
+    
+    // Cek apakah username atau email sudah ada
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][1] === data.username) return { success: false, message: "Username sudah digunakan!" };
+      if (rows[i][4] === data.email) return { success: false, message: "Email sudah digunakan!" };
+    }
+    
+    var newId = "USR" + new Date().getTime();
+    var encryptedPassword = hashPassword_(data.password); // Enkripsi password di sini
+    
+    sheet.appendRow([
+      newId, 
+      data.username, 
+      data.nama, 
+      data.noHp, 
+      data.email, 
+      encryptedPassword, // Menyimpan password yang sudah di-hash
+      new Date()
+    ]);
+    
+    return { 
+      success: true, 
+      message: "Registrasi berhasil!", 
+      user: { id: newId, username: data.username, nama: data.nama, noHp: data.noHp, email: data.email } 
+    };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
 }
 
 function apiLoginUser(username, password) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Users");
-  if (!sheet) return { success: false, message: "Belum ada user terdaftar." };
-  var data = sheet.getDataRange().getValues(); var userClean = String(username).trim().toLowerCase();
-  for (var i = 1; i < data.length; i++) { if (String(data[i][0]).trim().toLowerCase() === userClean && String(data[i][3]) === String(password)) { return { success: true, message: "Login berhasil!", user: { username: userClean, nama: String(data[i][1] || ''), noHp: String(data[i][2] || '') } }; } }
-  return { success: false, message: "Username atau Password salah!" };
+  try {
+    var sheet = getSheetByName_("Users");
+    var rows = sheet.getDataRange().getValues();
+    var inputHash = hashPassword_(password); // Hash password yang diketik user
+    var inputUserClean = String(username).trim().toLowerCase(); // Ubah input jadi teks huruf kecil
+    
+    for (var i = 1; i < rows.length; i++) {
+      var sheetUserClean = String(rows[i][1]).trim().toLowerCase(); // Ubah data di sheet jadi teks huruf kecil
+      
+      if (sheetUserClean === inputUserClean) {
+        if (String(rows[i][5]).trim() === inputHash) { // Cocokkan dengan hash di database
+          return { 
+            success: true, 
+            message: "Login berhasil!",
+            user: { id: rows[i][0], username: rows[i][1], nama: rows[i][2], noHp: rows[i][3], email: rows[i][4] } 
+          };
+        } else {
+          return { success: false, message: "Password salah!" };
+        }
+      }
+    }
+    return { success: false, message: "Username tidak ditemukan!" };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
 }
 
 function apiForgotPassword(email) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Users");
-  if (!sheet) return { success: false, message: "Belum ada user terdaftar." };
-  var data = sheet.getDataRange().getValues(); var emailClean = String(email).trim().toLowerCase();
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][5] && String(data[i][5]).trim().toLowerCase() === emailClean) {
-      try { MailApp.sendEmail(emailClean, "TAKO BUNNY - Pemulihan Akun", "Halo " + data[i][1] + ",\n\nBerikut adalah informasi login Anda:\n\nUsername: " + data[i][0] + "\nPassword: " + data[i][3] + "\n\nHarap simpan informasi ini dengan aman.\n\nSalam,\nTAKO BUNNY."); return { success: true, message: "Informasi login telah dikirim ke email Anda." }; } catch (e) { return { success: false, message: "Error sistem: " + e.toString() }; }
+  try {
+    var sheet = getSheetByName_("Users");
+    var rows = sheet.getDataRange().getValues();
+    
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][4] === email) {
+        // Buat password acak 8 karakter
+        var tempPass = Math.random().toString(36).slice(-8); 
+        var hashedTempPass = hashPassword_(tempPass);
+        
+        // Update password di spreadsheet dengan hash yang baru
+        sheet.getRange(i + 1, 6).setValue(hashedTempPass); 
+        
+        // Kirim email berisi password plain-text (sementara)
+        var userNama = rows[i][2];
+        var emailBody = "Halo " + userNama + ",\n\n" +
+                        "Kami telah mereset password akun TAKO BUNNY Anda.\n\n" +
+                        "Berikut adalah password sementara Anda:\n" +
+                        "Password: " + tempPass + "\n\n" +
+                        "Gunakan password di atas untuk login kembali.";
+                        
+        MailApp.sendEmail({
+          to: email,
+          subject: "Reset Password - TAKO BUNNY",
+          body: emailBody
+        });
+        
+        return { success: true, message: "Password sementara telah dikirim ke email Anda." };
+      }
     }
-  } return { success: false, message: "Email tidak ditemukan dalam sistem." };
+    return { success: false, message: "Email tidak terdaftar." };
+  } catch (e) {
+    return { success: false, message: "Gagal memproses permintaan: " + e.message };
+  }
+}
+function apiChangePassword(username, oldPassword, newPassword) {
+  try {
+    var sheet = getSheetByName_("Users");
+    var rows = sheet.getDataRange().getValues();
+    var oldHash = hashPassword_(oldPassword);
+    var newHash = hashPassword_(newPassword);
+    
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][1] === username) {
+        if (rows[i][5] === oldHash) {
+          // Timpa password lama dengan hash password baru
+          sheet.getRange(i + 1, 6).setValue(newHash);
+          return { success: true, message: "Password berhasil diubah!" };
+        } else {
+          return { success: false, message: "Password lama salah!" };
+        }
+      }
+    }
+    return { success: false, message: "Akun tidak ditemukan." };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+}
+function hashPassword_(password) {
+  var rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, password, Utilities.Charset.UTF_8);
+  var hashTxt = '';
+  for (var i = 0; i < rawHash.length; i++) {
+    var byteValue = rawHash[i];
+    if (byteValue < 0) byteValue += 256;
+    var byteString = byteValue.toString(16);
+    if (byteString.length == 1) byteString = '0' + byteString;
+    hashTxt += byteString;
+  }
+  return hashTxt;
 }
 
-function apiLoginAdmin(user, pass) { if (user === "admin" && pass === "ardana21") return { success: true, message: "Login Berhasil" }; else return { success: false, message: "Username atau Password Salah!" }; }
+function apiLoginAdmin(username, password) {
+  var props = PropertiesService.getScriptProperties();
+  var adminUser = props.getProperty('ADMIN_USER');
+  var adminPass = props.getProperty('ADMIN_PASS');
+  
+  if (username === adminUser && password === adminPass) {
+    return { success: true };
+  }
+  return { success: false, message: "Username atau Password Admin salah." };
+}
 
 function apiAddKatalog(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet(); var sheet = ss.getSheetByName("Katalog");
