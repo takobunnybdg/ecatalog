@@ -712,15 +712,15 @@
     if (urls.length <= 1) {
       mediaHtml = createMediaHtml(urls[0] || '', item.nama, 'w-full h-full object-contain mx-auto');
     } else {
-      mediaHtml = '<div class="relative w-full h-full flex items-center bg-black">';
+      mediaHtml = '<div class="relative w-full h-full flex items-center bg-transparent">';
       mediaHtml += '<div id="slider-katalog-detail" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar w-full h-full items-center gap-0">';
       for (var m = 0; m < urls.length; m++) { 
-          mediaHtml += '<div class="snap-center shrink-0 w-full h-full flex items-center justify-center">' + createMediaHtml(urls[m], item.nama, 'w-full h-full object-contain') + '</div>'; 
-      }
+      mediaHtml += '<div class="snap-center shrink-0 w-full h-full flex items-center justify-center">' + createMediaHtml(urls[m], item.nama, 'w-full h-full object-contain') + '</div>'; 
+    }
       mediaHtml += '</div>';
-      mediaHtml += '<button type="button" onclick="slideKatalog(-1)" class="absolute left-3 z-20 bg-white/50 text-black w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-white backdrop-blur transition-all border border-transparent"><i class="ph-bold ph-caret-left text-lg"></i></button>';
-      mediaHtml += '<button type="button" onclick="slideKatalog(1)" class="absolute right-3 z-20 bg-white/50 text-black w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-white backdrop-blur transition-all border border-transparent"><i class="ph-bold ph-caret-right text-lg"></i></button>';
-      mediaHtml += '<div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md shadow-sm z-10 tracking-widest"><i class="ph-fill ph-images align-middle mr-1"></i> ' + urls.length + ' FOTO</div></div>';
+      mediaHtml += '<button type="button" onclick="slideKatalog(-1)" class="absolute left-3 z-20 bg-white/80 text-earth w-8 h-8 rounded-full flex items-center justify-center shadow-sm hover:bg-white backdrop-blur transition-all border border-transparent"><i class="ph-bold ph-caret-left text-lg"></i></button>';
+      mediaHtml += '<button type="button" onclick="slideKatalog(1)" class="absolute right-3 z-20 bg-white/80 text-earth w-8 h-8 rounded-full flex items-center justify-center shadow-sm hover:bg-white backdrop-blur transition-all border border-transparent"><i class="ph-bold ph-caret-right text-lg"></i></button>';
+      mediaHtml += '<div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-earth/90 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md shadow-sm z-10 tracking-widest"><i class="ph-fill ph-images align-middle mr-1"></i> ' + urls.length + ' FOTO</div></div>';
     }
     var box = document.getElementById('detail-media-box');
     box.innerHTML = mediaHtml; 
