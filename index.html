@@ -571,7 +571,9 @@
            return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
         }
       }
-      return '<video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" playsinline webkit-playsinline controls ' + (extraClass && extraClass.indexOf('object-contain') !== -1 ? 'preload="metadata"' : 'autoplay loop muted') + '></video>'; 
+      // KODE BARU (Perbaikan Layar Hitam iOS):
+var vidExtra = extraClass && extraClass.indexOf('object-contain') !== -1 ? 'preload="metadata"' : 'autoplay loop muted';
+return '<div class="w-full h-full flex items-center justify-center bg-black"><video src="' + cleanUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + '" style="-webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0);" playsinline webkit-playsinline disablePictureInPicture controls ' + vidExtra + '></video></div>'; 
     } 
     return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">'; 
   }
