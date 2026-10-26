@@ -447,7 +447,7 @@
   // =====================================================================
   // ADAPTER GOOGLE SCRIPT RUN UNTUK HOSTING EKSTERNAL
   // =====================================================================
-  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzW8luXAwaFRI4lcE6KEF23YNU3fug_fcyBBNVySyFl4AapW7Jvf2fexKQpGByTgjtVCw/exec"; 
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcmJBB5xYaEBhFAUvyVRwpa_aKKpdQvvKTdq-_uW_f8fZ5kjejHKJErBDhB9-7qJbXGQ/exec"; 
   // ⚠️ WAJIB: GANTI TEKS DI ATAS DENGAN LINK GOOGLE APPS SCRIPT ANDA! ⚠️
 
   if (typeof google === 'undefined') {
@@ -547,38 +547,43 @@
     return cleanUrl; 
   }
 
-  function createMediaHtml(url, altText, extraClass) { 
-    var cleanUrl = fixImageUrl(url); 
-    if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>'; 
+function createMediaHtml(url, altText, extraClass) { 
+  var cleanUrl = fixImageUrl(url); 
+  if (!cleanUrl) return '<div class="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-sm text-gray-300 font-bold"><i class="ph-duotone ph-image-broken text-4xl mb-2"></i></div>'; 
+  
+  var lower = cleanUrl.toLowerCase(); 
+  var isThumbnail = (extraClass && extraClass.indexOf('group-hover') !== -1);
+  var isTesti = (extraClass && extraClass.indexOf('object-contain') !== -1);
+  
+  if (lower.indexOf('tiktok.com') !== -1) { 
+    var m = cleanUrl.match(/\/video\/(\d+)/); 
+    if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>'; 
+  } 
+  if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) { 
+    var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0]; 
+    return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>'; 
+  } 
+  if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) { 
+    var idMatch = cleanUrl.match(/[\w-]{25,}/); 
     
-    var lower = cleanUrl.toLowerCase(); 
-    var isThumbnail = (extraClass && extraClass.indexOf('group-hover') !== -1);
-    
-    if (lower.indexOf('tiktok.com') !== -1) { 
-      var m = cleanUrl.match(/\/video\/(\d+)/); 
-      if (m && m[1]) return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.tiktok.com/player/v1/' + m[1] + '?autoplay=0" frameborder="0" allowfullscreen></iframe>'; 
-    } 
-    if (lower.indexOf('youtube.com') !== -1 || lower.indexOf('youtu.be') !== -1) { 
-      var ytId = lower.indexOf('youtu.be/') !== -1 ? cleanUrl.split('youtu.be/')[1].split('?')[0] : cleanUrl.split('v=')[1].split('&')[0]; 
-      return '<iframe class="' + (extraClass || 'w-full h-full object-cover') + '" src="https://www.youtube.com/embed/' + ytId + '?autoplay=0&mute=1" frameborder="0" allowfullscreen></iframe>'; 
-    } 
-    if (lower.indexOf('.mp4') !== -1 || lower.indexOf('.webm') !== -1 || lower.indexOf('.mov') !== -1) { 
-      var idMatch = cleanUrl.match(/[\w-]{25,}/); 
-      if ((lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) && idMatch && idMatch[0]) {
-        if (isThumbnail) {
-           return '<div class="relative w-full h-full"><img src="https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600" class="' + (extraClass || 'w-full h-full object-cover') + '" alt="Video Thumbnail" onerror="this.src=\'https://via.placeholder.com/300?text=Video+Kelinci\'"><div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors"><i class="ph-fill ph-play-circle text-white text-5xl drop-shadow-md opacity-90"></i></div></div>';
-        } else {
-           return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
-        }
+    // GOOGLE DRIVE WAJIB MENGGUNAKAN IFRAME AGAR TIDAK BLANK HITAM
+    if ((lower.indexOf('lh3.googleusercontent.com') !== -1 || lower.indexOf('drive.google.com') !== -1) && idMatch && idMatch[0]) {
+      if (isThumbnail) {
+         return '<div class="relative w-full h-full"><img src="https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600" class="' + (extraClass || 'w-full h-full object-cover') + '" alt="Video Thumbnail" onerror="this.src=\'https://via.placeholder.com/300?text=Video+Kelinci\'"><div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors"><i class="ph-fill ph-play-circle text-white text-5xl drop-shadow-md opacity-90"></i></div></div>';
+      } else {
+         return '<iframe src="https://drive.google.com/file/d/' + idMatch[0] + '/preview" class="w-full h-full relative z-20 rounded-[1rem]" style="border:none;" allow="autoplay" allowfullscreen></iframe>';
       }
-      var vidUrl = cleanUrl.indexOf('#t=') === -1 ? cleanUrl + '#t=0.001' : cleanUrl;
-      var isTesti = extraClass && extraClass.indexOf('object-contain') !== -1;
-      var vidAttr = isTesti ? 'autoplay loop muted playsinline webkit-playsinline onclick="this.muted=!this.muted; if(this.paused) this.play();"' : 'autoplay loop muted playsinline webkit-playsinline controls';
-      return '<video src="' + vidUrl + '" class="' + (extraClass || 'w-full h-full object-cover') + ' cursor-pointer" ' + vidAttr + ' style="-webkit-transform: translateZ(0); transform: translateZ(0);"></video>';
-
-      } 
-    return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">'; 
-  }
+    }
+    
+    // PEMUTAR BERSIH HANYA JALAN UNTUK HOSTING NON-GOOGLE
+    var vidUrl = cleanUrl.indexOf('#t=') === -1 ? cleanUrl + '#t=0.001' : cleanUrl;
+    var vidAttr = isTesti ? 'autoplay loop muted playsinline webkit-playsinline disablePictureInPicture onclick="this.muted=!this.muted; if(this.paused) this.play();"' : 'autoplay loop muted playsinline webkit-playsinline controls disablePictureInPicture';
+    
+    return '<video src="' + vidUrl + '" class="relative z-20 ' + (extraClass || 'w-full h-full object-cover') + (isTesti ? ' cursor-pointer' : '') + '" ' + vidAttr + ' style="-webkit-transform: translateZ(0); transform: translateZ(0);"></video>'; 
+  } 
+  
+  return '<img src="' + cleanUrl + '" alt="' + (altText || 'Media') + '" class="' + (extraClass || 'w-full h-full object-cover') + '" onerror="this.onerror=null; this.src=\'https://via.placeholder.com/300?text=TAKO+BUNNY\';">'; 
+}
   
   function getAgeInDays(dobStr) { if (!dobStr) return 999; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return 999; return Math.max(0, Math.floor((new Date().getTime() - dobDate.getTime()) / (1000 * 3600 * 24))); }
   function getEstimatedReadyDate(dobStr) { if (!dobStr) return 'Saat Usia 2 Bulan (60 Hari)'; var dobDate = new Date(dobStr); if (isNaN(dobDate.getTime())) return 'Saat Usia 2 Bulan (60 Hari)'; var rDate = new Date(dobDate); rDate.setDate(rDate.getDate() + 60); var bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]; return rDate.getDate() + " " + bln[rDate.getMonth()] + " " + rDate.getFullYear(); }
